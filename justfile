@@ -17,12 +17,6 @@ build:
 preview:
     pnpm run preview
 
-# Split a large JS file into modules
-split FILE='src/original.js':
-    @echo "Splitting {{FILE}} into modules..."
-    @mkdir -p src/modules
-    @echo "Please manually split your file into appropriate modules"
-
 # Clean dist directory
 clean:
     rm -rf dist
