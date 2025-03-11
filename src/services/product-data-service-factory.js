@@ -21,6 +21,15 @@ import {
   ChefsStoreProductNumberExtractor
 } from '../extractors/website/chefs-store-extractors.js';
 
+// Import Amazon-specific extractors
+import {
+  AmazonNameExtractor,
+  AmazonPriceExtractor,
+  AmazonRatingsExtractor,
+  AmazonVariantExtractor,
+  AmazonImageExtractor
+} from '../extractors/website/amazon-extractors.js';
+
 /**
  * Factory for creating a ProductDataService with configuration
  * Simplifies creation of the service with proper dependency injection
@@ -75,11 +84,29 @@ export class ProductDataServiceFactory {
       }
     });
     
+    // Amazon configuration
+    const amazonConfig = ProductConfig.forWebsite('amazon', {
+      productContainer: '[data-component-type="s-search-result"]',
+      selectors: {
+        productName: '.a-size-base-plus',
+        productPrice: '.a-price .a-offscreen, .a-color-base',
+        productRatings: '.a-icon-star-small, .a-icon-star',
+        reviewCount: '.a-size-base.s-underline-text',
+        productImage: '.s-image',
+        productVariant: '.a-size-base.a-color-base.s-background-color-platinum.a-padding-mini'
+      },
+      patterns: {
+        price: /\$\s*(\d+\.?\d*)/,
+        reviews: /(\d+[\d,]*)/
+      }
+    });
+
     // Register all configurations
     this.configRegistry
       .setDefaultConfig(defaultConfig)
       .registerConfig('qfc', qfcConfig)
-      .registerConfig('chefsstore', chefsStoreConfig);
+      .registerConfig('chefsstore', chefsStoreConfig)
+      .registerConfig('amazon', amazonConfig);
   }
   
   /**
@@ -96,6 +123,8 @@ export class ProductDataServiceFactory {
       websiteId = 'chefsstore';
     } else if (currentUrl.includes('qfc') || document.querySelector('[data-testid^="product-card-"]')) {
       websiteId = 'qfc';
+    } else if (currentUrl.includes('amazon') || document.querySelector('[data-component-type="s-search-result"]')) {
+      websiteId = 'amazon';
     }
     
     console.log(`Detected website: ${websiteId}`);
@@ -146,6 +175,16 @@ export class ProductDataServiceFactory {
           new ChefsStoreCasePriceExtractor(config),
           new ChefsStoreSizeExtractor(config),
           new ChefsStoreProductNumberExtractor(config)
+        ]);
+        break;
+
+      case 'amazon':
+        extractor.setExtractors([
+          new AmazonNameExtractor(config),
+          new AmazonPriceExtractor(config),
+          new AmazonRatingsExtractor(config),
+          new AmazonVariantExtractor(config),
+          new AmazonImageExtractor(config)
         ]);
         break;
     }
