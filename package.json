@@ -1,5 +1,5 @@
 {
-  "name": "vite-js-bundler",
+  "name": "socialsparrow",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,9 +7,6 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^5.1.4"
   }
 }
 
