@@ -30,6 +30,15 @@ import {
   AmazonImageExtractor
 } from '../extractors/website/amazon-extractors.js';
 
+// Import Trader Joe's-specific extractors
+import {
+  TraderJoesNameExtractor,
+  TraderJoesPriceExtractor,
+  TraderJoesUnitPriceExtractor,
+  TraderJoesCategoryExtractor,
+  TraderJoesImageExtractor
+} from '../extractors/website/trader-joes-extractors.js';
+
 /**
  * Factory for creating a ProductDataService with configuration
  * Simplifies creation of the service with proper dependency injection
@@ -101,12 +110,25 @@ export class ProductDataServiceFactory {
       }
     });
 
+    // Trader Joe's configuration
+    const traderJoesConfig = ProductConfig.forWebsite('traderjoes', {
+      productContainer: '.SearchResultCard_searchResultCard__3V-_h',
+      selectors: {
+        productName: '.SearchResultCard_searchResultCard__title__2PdBv a',
+        productPrice: '.ProductPrice_productPrice__price__3-50j',
+        productUnit: '.ProductPrice_productPrice__unit__2jvkA',
+        productCategory: '.SearchResultCard_searchResultCard__categoryName__uD3vj a',
+        productImage: '.SearchResultCard_searchResultCard__image__2Yf2S img'
+      }
+    });
+
     // Register all configurations
     this.configRegistry
       .setDefaultConfig(defaultConfig)
       .registerConfig('qfc', qfcConfig)
       .registerConfig('chefsstore', chefsStoreConfig)
-      .registerConfig('amazon', amazonConfig);
+      .registerConfig('amazon', amazonConfig)
+      .registerConfig('traderjoes', traderJoesConfig);
   }
   
   /**
@@ -125,6 +147,8 @@ export class ProductDataServiceFactory {
       websiteId = 'qfc';
     } else if (currentUrl.includes('amazon') || document.querySelector('[data-component-type="s-search-result"]')) {
       websiteId = 'amazon';
+    } else if (currentUrl.includes('traderjoes') || document.querySelector('.SearchResultCard_searchResultCard__3V-_h')) {
+      websiteId = 'traderjoes';
     }
     
     console.log(`Detected website: ${websiteId}`);
@@ -185,6 +209,16 @@ export class ProductDataServiceFactory {
           new AmazonRatingsExtractor(config),
           new AmazonVariantExtractor(config),
           new AmazonImageExtractor(config)
+        ]);
+        break;
+
+      case 'traderjoes':
+        extractor.setExtractors([
+          new TraderJoesNameExtractor(config),
+          new TraderJoesPriceExtractor(config),
+          new TraderJoesUnitPriceExtractor(config),
+          new TraderJoesCategoryExtractor(config),
+          new TraderJoesImageExtractor(config)
         ]);
         break;
     }
