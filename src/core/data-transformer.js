@@ -9,9 +9,17 @@ export class DataTransformer {
    * @return {Object} Formatted data object
    */
   static formatAsJson(products) {
+    const timestamp = new Date().toISOString();
+
+    // Add timestamp to each product
+    const productsWithTimestamp = products.map(product => ({
+      ...product,
+      timestamp
+    }));
+
+    // Return the data object without timestamp at top level
     return {
-      timestamp: new Date().toISOString(),
-      products: products,
+      products: productsWithTimestamp,
       totalProducts: products.length
     };
   }
@@ -32,4 +40,3 @@ export class DataTransformer {
     }
   }
 }
-
