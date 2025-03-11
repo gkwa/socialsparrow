@@ -53,7 +53,7 @@ export class ProductDataServiceFactory {
       productUnit: '[data-testid="cart-page-item-sizing"]',
       selectors: {
         productImage: '.kds-Image-img',
-        productLink: 'a.kds-Link[href]',
+        productLink: '.kds-Link[href*="/p/"]', // Updated selector to target product links
         productOriginalPrice: '.kds-Price-original',
         productSize: '[data-testid="cart-page-item-sizing"]'
       }
