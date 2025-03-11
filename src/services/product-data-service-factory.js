@@ -39,6 +39,14 @@ import {
   TraderJoesImageExtractor
 } from '../extractors/website/trader-joes-extractors.js';
 
+// Import Whole Foods-specific extractors
+import {
+  WholeFoodsNameExtractor,
+  WholeFoodsPriceExtractor,
+  WholeFoodsImageExtractor,
+  WholeFoodsSizeExtractor
+} from '../extractors/website/whole-foods-extractors.js';
+
 /**
  * Factory for creating a ProductDataService with configuration
  * Simplifies creation of the service with proper dependency injection
@@ -122,13 +130,29 @@ export class ProductDataServiceFactory {
       }
     });
 
+    // Whole Foods configuration
+    const wholeFoodsConfig = ProductConfig.forWebsite('wholefoodsmarket', {
+      productContainer: '.w-pie--product-tile',
+      selectors: {
+        productName: '[data-testid="product-tile-name"]',
+        productBrand: '[data-testid="product-tile-brand"]',
+        productPrice: '.text-left.bds--heading-5',
+        productLink: '[data-testid="product-tile-link"]',
+        productImage: '[data-testid="product-tile-image"]'
+      },
+      patterns: {
+        price: /\$(\d+\.\d+)/
+      }
+    });
+
     // Register all configurations
     this.configRegistry
       .setDefaultConfig(defaultConfig)
       .registerConfig('qfc', qfcConfig)
       .registerConfig('chefsstore', chefsStoreConfig)
       .registerConfig('amazon', amazonConfig)
-      .registerConfig('traderjoes', traderJoesConfig);
+      .registerConfig('traderjoes', traderJoesConfig)
+      .registerConfig('wholefoodsmarket', wholeFoodsConfig);
   }
   
   /**
@@ -149,6 +173,8 @@ export class ProductDataServiceFactory {
       websiteId = 'amazon';
     } else if (currentUrl.includes('traderjoes') || document.querySelector('.SearchResultCard_searchResultCard__3V-_h')) {
       websiteId = 'traderjoes';
+    } else if (currentUrl.includes('wholefoodsmarket') || document.querySelector('.w-pie--product-tile')) {
+      websiteId = 'wholefoodsmarket';
     }
     
     console.log(`Detected website: ${websiteId}`);
@@ -219,6 +245,15 @@ export class ProductDataServiceFactory {
           new TraderJoesUnitPriceExtractor(config),
           new TraderJoesCategoryExtractor(config),
           new TraderJoesImageExtractor(config)
+        ]);
+        break;
+
+      case 'wholefoodsmarket':
+        extractor.setExtractors([
+          new WholeFoodsNameExtractor(config),
+          new WholeFoodsPriceExtractor(config),
+          new WholeFoodsImageExtractor(config),
+          new WholeFoodsSizeExtractor(config)
         ]);
         break;
     }
