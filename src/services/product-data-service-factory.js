@@ -47,6 +47,15 @@ import {
   WholeFoodsSizeExtractor
 } from '../extractors/website/whole-foods-extractors.js';
 
+// Import PCC Markets-specific extractors
+import {
+  PCCMarketsNameExtractor,
+  PCCMarketsPriceExtractor,
+  PCCMarketsUnitPriceExtractor,
+  PCCMarketsBadgeExtractor,
+  PCCMarketsImageExtractor
+} from '../extractors/website/pcc-extractors.js';
+
 /**
  * Factory for creating a ProductDataService with configuration
  * Simplifies creation of the service with proper dependency injection
@@ -145,6 +154,22 @@ export class ProductDataServiceFactory {
       }
     });
 
+    // PCC Markets configuration
+    const pccMarketsConfig = ProductConfig.forWebsite('pcc-markets', {
+      productContainer: '.e-13udsys',
+      selectors: {
+        productName: '.e-147kl2c',
+        productPrice: '.e-2feaft',
+        productUnit: '.e-1ezwhur',
+        productBadge: '.e-ul5tuv',
+        productImage: '.e-19e3dsf',
+        productLink: 'a.e-eevw7b'
+      },
+      patterns: {
+        price: /\$\s*(\d+\.?\d*)/
+      }
+    });
+
     // Register all configurations
     this.configRegistry
       .setDefaultConfig(defaultConfig)
@@ -152,7 +177,8 @@ export class ProductDataServiceFactory {
       .registerConfig('chefsstore', chefsStoreConfig)
       .registerConfig('amazon', amazonConfig)
       .registerConfig('traderjoes', traderJoesConfig)
-      .registerConfig('wholefoodsmarket', wholeFoodsConfig);
+      .registerConfig('wholefoodsmarket', wholeFoodsConfig)
+      .registerConfig('pcc-markets', pccMarketsConfig);
   }
   
   /**
@@ -175,6 +201,8 @@ export class ProductDataServiceFactory {
       websiteId = 'traderjoes';
     } else if (currentUrl.includes('wholefoodsmarket') || document.querySelector('.w-pie--product-tile')) {
       websiteId = 'wholefoodsmarket';
+    } else if (currentUrl.includes('pcc-markets') || document.querySelector('.e-13udsys')) {
+      websiteId = 'pcc-markets';
     }
     
     console.log(`Detected website: ${websiteId}`);
@@ -254,6 +282,16 @@ export class ProductDataServiceFactory {
           new WholeFoodsPriceExtractor(config),
           new WholeFoodsImageExtractor(config),
           new WholeFoodsSizeExtractor(config)
+        ]);
+        break;
+
+      case 'pcc-markets':
+        extractor.setExtractors([
+          new PCCMarketsNameExtractor(config),
+          new PCCMarketsPriceExtractor(config),
+          new PCCMarketsUnitPriceExtractor(config),
+          new PCCMarketsBadgeExtractor(config),
+          new PCCMarketsImageExtractor(config)
         ]);
         break;
     }
