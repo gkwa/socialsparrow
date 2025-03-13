@@ -34,20 +34,52 @@ export class AmazonNameExtractor extends BaseExtractor {
  */
 export class AmazonPriceExtractor extends BaseExtractor {
   extract(element) {
-    const priceElement = element.querySelector(this.config.selectors.productPrice);
-    let price = 'N/A';
-
-    if (priceElement) {
-      price = priceElement.textContent.trim();
-
-      // Extract the numeric price using regex if needed
-      const priceMatch = price.match(this.config.patterns.price);
-      if (priceMatch) {
-        price = `$${priceMatch[1]}`;
+    // Strategy 1: Look for the specific price element with a-offscreen class
+    const priceOffscreen = element.querySelector('.a-price .a-offscreen');
+    if (priceOffscreen) {
+      const price = priceOffscreen.textContent.trim();
+      if (price.match(/\$\d+\.\d+/)) {
+        return { price };
       }
     }
 
-    return { price };
+    // Strategy 2: Look for price whole and fraction parts separately
+    const wholePart = element.querySelector('.a-price-whole');
+    const fractionPart = element.querySelector('.a-price-fraction');
+    if (wholePart && fractionPart) {
+      const whole = wholePart.textContent.trim().replace(/[^\d]/g, '');
+      const fraction = fractionPart.textContent.trim().replace(/[^\d]/g, '');
+      return { price: `$${whole}.${fraction}` };
+    }
+
+    // Strategy 3: Look for a-color-price class
+    const colorPrice = element.querySelector('.a-color-price');
+    if (colorPrice) {
+      const priceText = colorPrice.textContent.trim();
+      const priceMatch = priceText.match(/\$(\d+\.\d+)/);
+      if (priceMatch) {
+        return { price: `$${priceMatch[1]}` };
+      }
+    }
+
+    // Strategy 4: Look for sponsored text
+    const sponsoredElement = element.querySelector('.a-color-secondary:not(.a-size-base)');
+    if (sponsoredElement && sponsoredElement.textContent.includes('Sponsored')) {
+      return { price: 'Sponsored' };
+    }
+
+    // Strategy 5: If we can't find a price, check if there's a price link that we can use
+    const dealPrice = element.querySelector('.a-link-normal .a-color-base');
+    if (dealPrice) {
+      const priceText = dealPrice.textContent.trim();
+      const priceMatch = priceText.match(/\$(\d+\.\d+)/);
+      if (priceMatch) {
+        return { price: `$${priceMatch[1]}` };
+      }
+    }
+
+    // If we couldn't extract a valid price with any strategy, return N/A
+    return { price: 'N/A' };
   }
 }
 

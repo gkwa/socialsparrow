@@ -115,7 +115,7 @@ export class ProductDataServiceFactory {
       productContainer: '[data-component-type="s-search-result"]',
       selectors: {
         productName: '.a-size-base-plus',
-        productPrice: '.a-price .a-offscreen, .a-color-base',
+        productPrice: '.a-price .a-offscreen, .a-color-price',
         productRatings: '.a-icon-star-small, .a-icon-star',
         reviewCount: '.a-size-base.s-underline-text',
         productImage: '.s-image',
@@ -262,7 +262,7 @@ export class ProductDataServiceFactory {
           new AmazonPriceExtractor(config),
           new AmazonRatingsExtractor(config),
           new AmazonVariantExtractor(config),
-          new AmazonImageExtractor(config)
+          new ImageUrlExtractor(config)
         ]);
         break;
 
