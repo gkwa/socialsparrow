@@ -1,10 +1,10 @@
-import { ProductExtractor } from '../../extractors/product-extractor.js';
+import { ProductExtractor } from "../../extractors/product-extractor.js"
 import {
   WholeFoodsNameExtractor,
   WholeFoodsPriceExtractor,
   WholeFoodsImageExtractor,
-  WholeFoodsSizeExtractor
-} from '../../extractors/website/whole-foods-extractors.js';
+  WholeFoodsSizeExtractor,
+} from "../../extractors/website/whole-foods-extractors.js"
 
 /**
  * Factory for creating Whole Foods-specific extractors
@@ -16,13 +16,13 @@ export class WholeFoodsExtractorFactory {
    * @return {ProductExtractor} Configured extractor
    */
   static create(config) {
-    const extractor = new ProductExtractor(config);
+    const extractor = new ProductExtractor(config)
     extractor.setExtractors([
       new WholeFoodsNameExtractor(config),
       new WholeFoodsPriceExtractor(config),
       new WholeFoodsImageExtractor(config),
-      new WholeFoodsSizeExtractor(config)
-    ]);
-    return extractor;
+      new WholeFoodsSizeExtractor(config),
+    ])
+    return extractor
   }
 }

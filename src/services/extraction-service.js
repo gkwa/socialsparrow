@@ -1,4 +1,4 @@
-import { ProductDataServiceFactory } from './product-data-service-factory.js';
+import { ProductDataServiceFactory } from "./product-data-service-factory.js"
 
 /**
  * Initialize the extraction process based on the current website
@@ -8,25 +8,25 @@ import { ProductDataServiceFactory } from './product-data-service-factory.js';
  * @return {Promise<void>}
  */
 export async function initExtraction(options = {}) {
-  const { autoRun = true, targetWebsite = null } = options;
-  
+  const { autoRun = true, targetWebsite = null } = options
+
   // Check if we're on a supported website
-  const currentUrl = window.location.href;
-  let shouldRun = true;
-  
+  const currentUrl = window.location.href
+  let shouldRun = true
+
   // If target website is specified, check if current URL matches
   if (targetWebsite && !currentUrl.includes(targetWebsite)) {
-    console.error(`This script is intended for use on ${targetWebsite}. Current URL: ${currentUrl}`);
-    shouldRun = false;
+    console.error(`This script is intended for use on ${targetWebsite}. Current URL: ${currentUrl}`)
+    shouldRun = false
   }
-  
-  console.log("Product extraction script loaded successfully!");
-  
+
+  console.log("Product extraction script loaded successfully!")
+
   if (shouldRun && autoRun) {
-    console.log("Automatically running extraction...");
-    await extractProducts();
+    console.log("Automatically running extraction...")
+    await extractProducts()
   } else {
-    console.log("To extract product information, call extractProducts()");
+    console.log("To extract product information, call extractProducts()")
   }
 }
 
@@ -36,7 +36,6 @@ export async function initExtraction(options = {}) {
  * @return {Promise<Object>} Extracted product data
  */
 export async function extractProducts(customConfig = {}) {
-  const service = ProductDataServiceFactory.createDefault(customConfig);
-  return service.extractAndCopyToClipboard();
+  const service = ProductDataServiceFactory.createDefault(customConfig)
+  return service.extractAndCopyToClipboard()
 }
-

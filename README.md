@@ -7,3 +7,4 @@ A simple project for splitting a large JavaScript file into modules and then rec
 1. Initialize the project:
    ```bash
    just init
+   ```

@@ -1,11 +1,11 @@
-import { ProductExtractor } from '../../extractors/product-extractor.js';
+import { ProductExtractor } from "../../extractors/product-extractor.js"
 import {
   TraderJoesNameExtractor,
   TraderJoesPriceExtractor,
   TraderJoesUnitPriceExtractor,
   TraderJoesCategoryExtractor,
-  TraderJoesImageExtractor
-} from '../../extractors/website/trader-joes-extractors.js';
+  TraderJoesImageExtractor,
+} from "../../extractors/website/trader-joes-extractors.js"
 
 /**
  * Factory for creating Trader Joe's-specific extractors
@@ -17,14 +17,14 @@ export class TraderJoesExtractorFactory {
    * @return {ProductExtractor} Configured extractor
    */
   static create(config) {
-    const extractor = new ProductExtractor(config);
+    const extractor = new ProductExtractor(config)
     extractor.setExtractors([
       new TraderJoesNameExtractor(config),
       new TraderJoesPriceExtractor(config),
       new TraderJoesUnitPriceExtractor(config),
       new TraderJoesCategoryExtractor(config),
-      new TraderJoesImageExtractor(config)
-    ]);
-    return extractor;
+      new TraderJoesImageExtractor(config),
+    ])
+    return extractor
   }
 }

@@ -31,4 +31,3 @@ bundle-for-devtools:
     pnpm run build
     cat dist/assets/index-*.js | pbcopy || cat dist/assets/index-*.js | xclip -selection clipboard
     @echo "Bundled JS copied to clipboard. Paste it into Chrome DevTools console or snippets."
-

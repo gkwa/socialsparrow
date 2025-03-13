@@ -1,4 +1,4 @@
-import { BaseExtractor } from '../base-extractor.js';
+import { BaseExtractor } from "../base-extractor.js"
 
 /**
  * Extracts all text content from a product element as a single normalized string
@@ -14,17 +14,17 @@ export class RawTextExtractor extends BaseExtractor {
   extract(element) {
     try {
       // Collect all text content
-      const textParts = [];
-      this.collectTextFromElement(element, textParts);
+      const textParts = []
+      this.collectTextFromElement(element, textParts)
 
       // Join all parts with spaces and normalize
-      const joinedText = textParts.join(' ');
-      const normalizedText = this.normalizeWhitespace(joinedText);
+      const joinedText = textParts.join(" ")
+      const normalizedText = this.normalizeWhitespace(joinedText)
 
-      return { rawTextContent: normalizedText };
+      return { rawTextContent: normalizedText }
     } catch (error) {
-      console.error('Error extracting raw text content:', error);
-      return { rawTextContent: 'Error extracting text content' };
+      console.error("Error extracting raw text content:", error)
+      return { rawTextContent: "Error extracting text content" }
     }
   }
 
@@ -35,57 +35,58 @@ export class RawTextExtractor extends BaseExtractor {
    */
   collectTextFromElement(element, textParts) {
     // Skip hidden elements
-    if (element.style && (
-        element.style.display === 'none' ||
-        element.style.visibility === 'hidden' ||
-        element.hasAttribute('hidden')
-    )) {
-      return;
+    if (
+      element.style &&
+      (element.style.display === "none" ||
+        element.style.visibility === "hidden" ||
+        element.hasAttribute("hidden"))
+    ) {
+      return
     }
 
     // Skip script, style, and other non-content tags
-    const skipTags = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'SVG', 'TEMPLATE'];
+    const skipTags = ["SCRIPT", "STYLE", "NOSCRIPT", "IFRAME", "SVG", "TEMPLATE"]
     if (element.nodeType === Node.ELEMENT_NODE && skipTags.includes(element.tagName)) {
-      return;
+      return
     }
 
     // Handle text nodes
     if (element.nodeType === Node.TEXT_NODE) {
-      const text = element.textContent?.trim();
+      const text = element.textContent?.trim()
       if (text) {
-        textParts.push(text);
+        textParts.push(text)
       }
-      return;
+      return
     }
 
     // Special handling for specific elements
-    if (element.tagName === 'BR' || element.tagName === 'HR') {
-      textParts.push('');
-      return;
+    if (element.tagName === "BR" || element.tagName === "HR") {
+      textParts.push("")
+      return
     }
 
-    if (element.tagName === 'IMG' && element.alt) {
-      textParts.push(element.alt);
-      return;
+    if (element.tagName === "IMG" && element.alt) {
+      textParts.push(element.alt)
+      return
     }
 
     // Handle list items specially
-    if (element.tagName === 'LI') {
-      textParts.push('•');
+    if (element.tagName === "LI") {
+      textParts.push("•")
     }
 
     // Get the immediate text of this element (excluding child elements)
-    let hasChildElements = false;
+    let hasChildElements = false
 
     for (const child of element.childNodes) {
       if (child.nodeType === Node.ELEMENT_NODE) {
-        hasChildElements = true;
+        hasChildElements = true
       }
 
       if (child.nodeType === Node.TEXT_NODE) {
-        const text = child.textContent?.trim();
+        const text = child.textContent?.trim()
         if (text) {
-          textParts.push(text);
+          textParts.push(text)
         }
       }
     }
@@ -94,18 +95,24 @@ export class RawTextExtractor extends BaseExtractor {
     for (const child of element.childNodes) {
       if (child.nodeType === Node.ELEMENT_NODE) {
         // For elements with specific semantic meaning, add a marker
-        if (child.tagName === 'PRICE' ||
-            child.classList.contains('price') ||
-            child.classList.contains('product-price')) {
-          textParts.push('PRICE:');
+        if (
+          child.tagName === "PRICE" ||
+          child.classList.contains("price") ||
+          child.classList.contains("product-price")
+        ) {
+          textParts.push("PRICE:")
         }
 
-        if (child.tagName === 'H1' || child.tagName === 'H2' ||
-            child.tagName === 'H3' || child.tagName === 'H4') {
-          textParts.push('HEADING:');
+        if (
+          child.tagName === "H1" ||
+          child.tagName === "H2" ||
+          child.tagName === "H3" ||
+          child.tagName === "H4"
+        ) {
+          textParts.push("HEADING:")
         }
 
-        this.collectTextFromElement(child, textParts);
+        this.collectTextFromElement(child, textParts)
       }
     }
   }
@@ -116,21 +123,23 @@ export class RawTextExtractor extends BaseExtractor {
    * @return {string} Normalized text
    */
   normalizeWhitespace(text) {
-    if (!text) return '';
+    if (!text) return ""
 
-    return text
-      // Replace all whitespace sequences with a single space
-      .replace(/\s+/g, ' ')
-      // Ensure proper spacing around common separators and symbols
-      .replace(/([,:;()[\]{}])(\S)/g, '$1 $2')
-      .replace(/(\S)([,:;()[\]{}])/g, '$1 $2')
-      // Ensure proper spacing around currency symbols
-      .replace(/(\$)(\d)/g, '$1 $2')
-      // Fix common concatenated patterns
-      .replace(/(\d)([A-Za-z])/g, '$1 $2')
-      .replace(/([A-Za-z])(\d)/g, '$1 $2')
-      // Remove possible double spacing from the above operations
-      .replace(/\s+/g, ' ')
-      .trim();
+    return (
+      text
+        // Replace all whitespace sequences with a single space
+        .replace(/\s+/g, " ")
+        // Ensure proper spacing around common separators and symbols
+        .replace(/([,:;()[\]{}])(\S)/g, "$1 $2")
+        .replace(/(\S)([,:;()[\]{}])/g, "$1 $2")
+        // Ensure proper spacing around currency symbols
+        .replace(/(\$)(\d)/g, "$1 $2")
+        // Fix common concatenated patterns
+        .replace(/(\d)([A-Za-z])/g, "$1 $2")
+        .replace(/([A-Za-z])(\d)/g, "$1 $2")
+        // Remove possible double spacing from the above operations
+        .replace(/\s+/g, " ")
+        .trim()
+    )
   }
 }
