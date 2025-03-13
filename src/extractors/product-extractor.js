@@ -2,6 +2,7 @@ import { BaseExtractor } from './base-extractor.js';
 import { NameExtractor } from './generic/name-extractor.js';
 import { PriceExtractor } from './generic/price-extractor.js';
 import { PricePerUnitExtractor } from './generic/price-per-unit-extractor.js';
+import { RawTextExtractor } from './generic/raw-text-extractor.js';
 
 /**
  * Composite extractor that combines multiple extractors
@@ -13,7 +14,8 @@ export class ProductExtractor {
     this.extractors = [
       new NameExtractor(config),
       new PriceExtractor(config),
-      new PricePerUnitExtractor(config)
+      new PricePerUnitExtractor(config),
+      new RawTextExtractor(config) // Added the RawTextExtractor by default
     ];
   }
   
@@ -30,6 +32,13 @@ export class ProductExtractor {
    * @param {Array<BaseExtractor>} extractors - The extractors to set
    */
   setExtractors(extractors) {
+    // Ensure the RawTextExtractor is always included
+    const hasRawTextExtractor = extractors.some(e => e instanceof RawTextExtractor);
+
+    if (!hasRawTextExtractor) {
+      extractors.push(new RawTextExtractor(this.config));
+    }
+
     this.extractors = extractors;
   }
   
@@ -50,9 +59,9 @@ export class ProductExtractor {
         name: 'Error',
         price: 'Error',
         pricePerUnit: 'Error',
-        url: 'Error'
+        url: 'Error',
+        rawTextContent: 'Error extracting content'
       };
     }
   }
 }
-
