@@ -12,12 +12,27 @@ export class AmazonNameExtractor extends BaseExtractor {
     if (nameElement) {
       name = nameElement.textContent.trim();
 
-      // Get URL from the anchor tag
-      const linkElement = nameElement.tagName === 'A'
-        ? nameElement
-        : nameElement.closest('a');
-
-      url = linkElement ? linkElement.getAttribute('href') : 'N/A';
+      // First try to get URL from the direct link containing the product name
+      const productLink = nameElement.closest('a');
+      if (productLink && productLink.getAttribute('href')) {
+        url = productLink.getAttribute('href');
+      } else {
+        // If that fails, try to find any product link in the container
+        const linkElements = element.querySelectorAll('a[href*="/dp/"]');
+        if (linkElements.length > 0) {
+          url = linkElements[0].getAttribute('href');
+        } else {
+          // Try broader selector for any product link
+          const anyProductLinks = element.querySelectorAll('a.a-link-normal[href*="/"]');
+          for (const link of anyProductLinks) {
+            const href = link.getAttribute('href');
+            if (href && (href.includes('/dp/') || href.includes('/product/') || href.includes('/gp/'))) {
+              url = href;
+              break;
+            }
+          }
+        }
+      }
 
       // Make URL absolute if it's relative
       if (url !== 'N/A' && url.startsWith('/')) {

@@ -13,11 +13,13 @@ export class RawTextExtractor extends BaseExtractor {
    */
   extract(element) {
     try {
-      // Get all text nodes recursively
-      const textContent = this.getAllText(element);
+      // Collect all text content
+      const textParts = [];
+      this.collectTextFromElement(element, textParts);
 
-      // Normalize whitespace while preserving word boundaries
-      const normalizedText = this.normalizeWhitespace(textContent);
+      // Join all parts with spaces and normalize
+      const joinedText = textParts.join(' ');
+      const normalizedText = this.normalizeWhitespace(joinedText);
 
       return { rawTextContent: normalizedText };
     } catch (error) {
@@ -27,54 +29,85 @@ export class RawTextExtractor extends BaseExtractor {
   }
 
   /**
-   * Recursively get all text from an element and its children
+   * Collect text from an element and its children, treating each element as a separate entity
    * @param {HTMLElement} element - The element to extract text from
-   * @return {string} Concatenated text content
+   * @param {Array<string>} textParts - Array to collect text parts
    */
-  getAllText(element) {
+  collectTextFromElement(element, textParts) {
     // Skip hidden elements
     if (element.style && (
         element.style.display === 'none' ||
         element.style.visibility === 'hidden' ||
         element.hasAttribute('hidden')
     )) {
-      return '';
+      return;
     }
 
     // Skip script, style, and other non-content tags
     const skipTags = ['SCRIPT', 'STYLE', 'NOSCRIPT', 'IFRAME', 'SVG', 'TEMPLATE'];
-    if (skipTags.includes(element.tagName)) {
-      return '';
+    if (element.nodeType === Node.ELEMENT_NODE && skipTags.includes(element.tagName)) {
+      return;
     }
 
-    let text = '';
-
-    // Get text from this node
+    // Handle text nodes
     if (element.nodeType === Node.TEXT_NODE) {
-      return element.textContent || '';
+      const text = element.textContent?.trim();
+      if (text) {
+        textParts.push(text);
+      }
+      return;
     }
 
     // Special handling for specific elements
-    if (element.tagName === 'BR') {
-      return ' '; // Replace <br> with space
+    if (element.tagName === 'BR' || element.tagName === 'HR') {
+      textParts.push('');
+      return;
     }
 
     if (element.tagName === 'IMG' && element.alt) {
-      return ` ${element.alt} `; // Include image alt text
+      textParts.push(element.alt);
+      return;
     }
 
-    // Recursively get text from child nodes
+    // Handle list items specially
+    if (element.tagName === 'LI') {
+      textParts.push('•');
+    }
+
+    // Get the immediate text of this element (excluding child elements)
+    let hasChildElements = false;
+
     for (const child of element.childNodes) {
-      text += this.getAllText(child);
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        hasChildElements = true;
+      }
+
+      if (child.nodeType === Node.TEXT_NODE) {
+        const text = child.textContent?.trim();
+        if (text) {
+          textParts.push(text);
+        }
+      }
     }
 
-    // Add space after block level elements to ensure proper word separation
-    const blockElements = ['DIV', 'P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'TD', 'SECTION', 'ARTICLE'];
-    if (blockElements.includes(element.tagName)) {
-      text += ' ';
-    }
+    // Process child elements separately to ensure spacing between them
+    for (const child of element.childNodes) {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        // For elements with specific semantic meaning, add a marker
+        if (child.tagName === 'PRICE' ||
+            child.classList.contains('price') ||
+            child.classList.contains('product-price')) {
+          textParts.push('PRICE:');
+        }
 
-    return text;
+        if (child.tagName === 'H1' || child.tagName === 'H2' ||
+            child.tagName === 'H3' || child.tagName === 'H4') {
+          textParts.push('HEADING:');
+        }
+
+        this.collectTextFromElement(child, textParts);
+      }
+    }
   }
 
   /**
@@ -85,8 +118,18 @@ export class RawTextExtractor extends BaseExtractor {
   normalizeWhitespace(text) {
     if (!text) return '';
 
-    // Replace all whitespace sequences (including newlines, tabs) with a single space
     return text
+      // Replace all whitespace sequences with a single space
+      .replace(/\s+/g, ' ')
+      // Ensure proper spacing around common separators and symbols
+      .replace(/([,:;()[\]{}])(\S)/g, '$1 $2')
+      .replace(/(\S)([,:;()[\]{}])/g, '$1 $2')
+      // Ensure proper spacing around currency symbols
+      .replace(/(\$)(\d)/g, '$1 $2')
+      // Fix common concatenated patterns
+      .replace(/(\d)([A-Za-z])/g, '$1 $2')
+      .replace(/([A-Za-z])(\d)/g, '$1 $2')
+      // Remove possible double spacing from the above operations
       .replace(/\s+/g, ' ')
       .trim();
   }
