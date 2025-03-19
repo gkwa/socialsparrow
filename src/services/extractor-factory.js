@@ -12,6 +12,7 @@ import { WholeFoodsExtractorFactory } from "./extractors/whole-foods-extractor-f
 import { PCCExtractorFactory } from "./extractors/pcc-extractor-factory.js"
 import { LamsSeafoodExtractorFactory } from "./extractors/lams-seafood-extractor-factory.js"
 import { WalmartExtractorFactory } from "./extractors/walmart-extractor-factory.js"
+import { TargetExtractorFactory } from "./extractors/target-extractor-factory.js"
 
 /**
  * Abstract factory for creating website-specific extractors
@@ -43,6 +44,8 @@ export class ExtractorFactory {
         return LamsSeafoodExtractorFactory.create(config)
       case "walmart":
         return WalmartExtractorFactory.create(config)
+      case "target":
+        return TargetExtractorFactory.create(config)
       default:
         // Use generic extractors for unknown websites
         extractor.setExtractors([

@@ -147,6 +147,27 @@ export class WebsiteConfigFactory {
       },
     })
 
+    // Target configuration
+    const targetConfig = ProductConfig.forWebsite("target", {
+      productContainer: "[data-test='@web/site-top-of-funnel/ProductCardWrapper']",
+      selectors: {
+        productName: "[data-test='product-title']",
+        productPrice: "[data-test='current-price']",
+        productUnit: "[data-test='unit-price']",
+        productLink: "a[href*='/p/']",
+        productImage: "img",
+        productBrand: "[data-test='@web/ProductCard/ProductCardBrandAndRibbonMessage/brand']",
+        productRatings: ".styles_ndsRatingStars__rtewp",
+        reviewCount: ".styles_count__8KRt3",
+        productShipping: "[data-test='LPFulfillmentSectionShippingFA_standardShippingMessage']",
+        productSponsored: "[data-test='sponsoredText']",
+      },
+      patterns: {
+        price: /\$(\d+\.\d+)/,
+        pricePerUnit: /\(\$\s*(\d+\.\d+)\s*\/\s*([^)]+)\)/,
+      },
+    })
+
     // Register all configurations
     return registry
       .setDefaultConfig(defaultConfig)
@@ -158,6 +179,7 @@ export class WebsiteConfigFactory {
       .registerConfig("pcc-markets", pccMarketsConfig)
       .registerConfig("lamss", lamsSeafoodConfig)
       .registerConfig("walmart", walmartConfig)
+      .registerConfig("target", targetConfig)
   }
 
   /**

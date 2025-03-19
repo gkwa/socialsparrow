@@ -39,6 +39,11 @@ export class WebsiteDetector {
       document.querySelector("[data-automation-id='product-title']")
     ) {
       return "walmart"
+    } else if (
+      currentUrl.includes("target.com") ||
+      document.querySelector("[data-test='@web/site-top-of-funnel/ProductCardWrapper']")
+    ) {
+      return "target"
     }
     return "default"
   }
