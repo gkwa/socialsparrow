@@ -49,11 +49,19 @@ export class ProductDataService {
   }
 
   /**
+   * Extract products and return them
+   * @return {Array} Array of product objects
+   */
+  extractProducts() {
+    return this.extractAllProducts()
+  }
+
+  /**
    * Extract products and copy to clipboard
    * @param {string} format - Output format
    * @return {Promise<Object>} Extracted data
    */
-  async extractAndCopyToClipboard(format = "json") {
+  async extractProductsToClipboard(format = "json") {
     try {
       console.log("Starting product extraction...")
 

@@ -24,18 +24,30 @@ export async function initExtraction(options = {}) {
 
   if (shouldRun && autoRun) {
     console.log("Automatically running extraction...")
-    await extractProducts()
+    await extractProductsToClipboard()
   } else {
-    console.log("To extract product information, call extractProducts()")
+    console.log(
+      "To extract product information, call extractProducts() or extractProductsToClipboard()",
+    )
   }
 }
 
 /**
- * Main function to extract products from the current page
+ * Extract products and return the data without copying to clipboard
+ * @param {Object} customConfig - Optional custom configuration
+ * @return {Array} Array of product objects
+ */
+export function extractProducts(customConfig = {}) {
+  const service = ProductDataServiceFactory.createDefault(customConfig)
+  return service.extractProducts()
+}
+
+/**
+ * Extract products and copy to clipboard
  * @param {Object} customConfig - Optional custom configuration
  * @return {Promise<Object>} Extracted product data
  */
-export async function extractProducts(customConfig = {}) {
+export async function extractProductsToClipboard(customConfig = {}) {
   const service = ProductDataServiceFactory.createDefault(customConfig)
-  return service.extractAndCopyToClipboard()
+  return service.extractProductsToClipboard()
 }
