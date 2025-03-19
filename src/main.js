@@ -10,7 +10,5 @@ document.getElementById("extract-btn")?.addEventListener("click", () => {
 // Make the function available globally for use in Chrome DevTools
 window.extractProducts = extractProducts
 
-// Initialize with auto-run
-;(async () => {
-  await initExtraction({ autoRun: true })
-})()
+// Initialize without auto-run
+initExtraction({ autoRun: false })
