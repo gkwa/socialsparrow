@@ -32,8 +32,9 @@ export class WebsiteDetector {
       return "wholefoodsmarket"
     } else if (currentUrl.includes("pcc-markets") || document.querySelector(".e-13udsys")) {
       return "pcc-markets"
+    } else if (currentUrl.includes("lamsseafood") || document.querySelector(".sc-iJpgEM")) {
+      return "lamss"
     }
-
     return "default"
   }
 }

@@ -112,6 +112,22 @@ export class WebsiteConfigFactory {
       },
     })
 
+    // Lams Seafood configuration
+    const lamsSeafoodConfig = ProductConfig.forWebsite("lamss", {
+      productContainer: ".sc-iJpgEM",
+      selectors: {
+        productName: ".sc-lopPiv",
+        productPrice: ".sc-dEMAZk",
+        productUnit: ".sc-iugpza",
+        productImage: "img.sc-gyWaIF",
+        productLink: "a.sc-jrpyRe",
+      },
+      patterns: {
+        price: /\$(\d+\.\d+)/,
+        pricePerUnit: /\/\s*([^$]+)/,
+      },
+    })
+
     // Register all configurations
     return registry
       .setDefaultConfig(defaultConfig)
@@ -121,6 +137,7 @@ export class WebsiteConfigFactory {
       .registerConfig("traderjoes", traderJoesConfig)
       .registerConfig("wholefoodsmarket", wholeFoodsConfig)
       .registerConfig("pcc-markets", pccMarketsConfig)
+      .registerConfig("lamss", lamsSeafoodConfig)
   }
 
   /**

@@ -3,7 +3,6 @@ import { ProductExtractor } from "../extractors/product-extractor.js"
 import { NameExtractor } from "../extractors/generic/name-extractor.js"
 import { PriceExtractor } from "../extractors/generic/price-extractor.js"
 import { PricePerUnitExtractor } from "../extractors/generic/price-per-unit-extractor.js"
-
 // Import website-specific extractor factories
 import { QFCExtractorFactory } from "./extractors/qfc-extractor-factory.js"
 import { ChefsStoreExtractorFactory } from "./extractors/chefs-store-extractor-factory.js"
@@ -11,6 +10,7 @@ import { AmazonExtractorFactory } from "./extractors/amazon-extractor-factory.js
 import { TraderJoesExtractorFactory } from "./extractors/trader-joes-extractor-factory.js"
 import { WholeFoodsExtractorFactory } from "./extractors/whole-foods-extractor-factory.js"
 import { PCCExtractorFactory } from "./extractors/pcc-extractor-factory.js"
+import { LamsSeafoodExtractorFactory } from "./extractors/lams-seafood-extractor-factory.js"
 
 /**
  * Abstract factory for creating website-specific extractors
@@ -38,6 +38,8 @@ export class ExtractorFactory {
         return WholeFoodsExtractorFactory.create(config)
       case "pcc-markets":
         return PCCExtractorFactory.create(config)
+      case "lamss":
+        return LamsSeafoodExtractorFactory.create(config)
       default:
         // Use generic extractors for unknown websites
         extractor.setExtractors([
