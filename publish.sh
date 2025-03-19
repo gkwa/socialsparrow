@@ -1,14 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -e
 
-# Make sure script is executable (self-check)
-chmod +x "$0"
-
-# Create dist directory if it doesn't exist
 mkdir -p dist
-
-# Build the package
-echo "Building package..."
 pnpm run build
 
 # Login check
