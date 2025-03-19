@@ -128,6 +128,25 @@ export class WebsiteConfigFactory {
       },
     })
 
+    // Walmart configuration
+    const walmartConfig = ProductConfig.forWebsite("walmart", {
+      productContainer: ".sans-serif.mid-gray.relative.flex.flex-column.w-100",
+      selectors: {
+        productName: "[data-automation-id='product-title']",
+        productPrice: "[data-automation-id='product-price']",
+        productLink: "a[link-identifier]",
+        productImage: "img[data-testid='productTileImage']",
+        productOriginalPrice: ".f7.f6-l.black.mb2",
+        productShipping: "[data-automation-id='fulfillment-badge']",
+        productSponsored: ".f7.flex.items-center",
+        priceDollars: ".f2",
+        priceCents: ".f6.f5-l",
+      },
+      patterns: {
+        price: /\$(\d+\.?\d*)/,
+      },
+    })
+
     // Register all configurations
     return registry
       .setDefaultConfig(defaultConfig)
@@ -138,6 +157,7 @@ export class WebsiteConfigFactory {
       .registerConfig("wholefoodsmarket", wholeFoodsConfig)
       .registerConfig("pcc-markets", pccMarketsConfig)
       .registerConfig("lamss", lamsSeafoodConfig)
+      .registerConfig("walmart", walmartConfig)
   }
 
   /**

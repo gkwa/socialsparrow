@@ -34,6 +34,11 @@ export class WebsiteDetector {
       return "pcc-markets"
     } else if (currentUrl.includes("lamsseafood") || document.querySelector(".sc-iJpgEM")) {
       return "lamss"
+    } else if (
+      currentUrl.includes("walmart.com") ||
+      document.querySelector("[data-automation-id='product-title']")
+    ) {
+      return "walmart"
     }
     return "default"
   }
