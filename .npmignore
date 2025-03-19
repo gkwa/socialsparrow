@@ -1,0 +1,12 @@
+# Source files
+src/
+.justfile
+justfile
+vite.config.js
+
+# Development files
+node_modules/
+.git/
+.github/
+.gitignore
+pnpm-lock.yaml

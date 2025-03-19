@@ -1,10 +1,5 @@
-# JavaScript File Bundler
+# SocialSparrow
 
-A simple project for splitting a large JavaScript file into modules and then recombining them for use in Chrome DevTools.
+A utility for extracting product information from e-commerce websites.
 
-## Getting Started
-
-1. Initialize the project:
-   ```bash
-   just init
-   ```
+## Installation

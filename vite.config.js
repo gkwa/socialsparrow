@@ -1,20 +1,19 @@
 import { defineConfig } from "vite"
+import { resolve } from "path"
 
 export default defineConfig({
   build: {
-    // Configure to generate a single JS file
+    lib: {
+      entry: resolve(__dirname, "src/index.js"),
+      name: "SocialSparrow",
+      fileName: "index",
+    },
     rollupOptions: {
       output: {
-        format: "iife",
-        manualChunks: undefined,
-        // Ensure the code is wrapped in a self-invoking function
-        intro: "(function() {",
-        outro: "})();",
+        format: "es",
       },
     },
-    // Target older browsers for compatibility
     target: "es2015",
-    // Prevent minification from creating duplicate variable names
     minify: "terser",
     terserOptions: {
       mangle: {
