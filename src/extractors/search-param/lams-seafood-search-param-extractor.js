@@ -1,5 +1,4 @@
 import { BaseSearchParamExtractor } from "./base-search-param-extractor.js"
-
 /**
  * Lam's Seafood specific search parameter extractor
  */
@@ -12,14 +11,20 @@ export class LamsSeafoodSearchParamExtractor extends BaseSearchParamExtractor {
   extractSearchTerm(url) {
     try {
       if (!url) return null
-
       const urlObj = new URL(url)
 
-      // Lam's Seafood uses filter[text] which requires special handling
-      const searchParamString = urlObj.search
-      const regex = new RegExp(`filter\\[text\\]=([^&]+)`)
-      const match = searchParamString.match(regex)
+      // Try to get the filter[text] parameter directly
+      const filterText = urlObj.searchParams.get("filter[text]")
+      if (filterText) return filterText
 
+      // If that doesn't work, try with the encoded version
+      const encodedParam = urlObj.searchParams.get("filter%5Btext%5D")
+      if (encodedParam) return encodedParam
+
+      // As a fallback, try the regex approach for complex cases
+      const searchParamString = urlObj.search
+      const regex = /filter(?:%5B|\[)text(?:%5D|\])=([^&]+)/
+      const match = searchParamString.match(regex)
       if (match && match[1]) {
         return decodeURIComponent(match[1])
       }
