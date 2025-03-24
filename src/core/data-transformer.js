@@ -6,22 +6,39 @@ export class DataTransformer {
   /**
    * Format product data as JSON
    * @param {Array} products - Array of product objects
+   * @param {Object} options - Additional options
    * @return {Object} Formatted data object
    */
-  static formatAsJson(products) {
+  static formatAsJson(products, options = {}) {
     const timestamp = new Date().toISOString()
+    // Add timestamp and search term (if available) to each product
+    const productsWithMetadata = products.map((product) => {
+      // Create a new object with product data plus metadata
+      const productWithMetadata = {
+        ...product,
+        timestamp,
+      }
 
-    // Add timestamp to each product
-    const productsWithTimestamp = products.map((product) => ({
-      ...product,
-      timestamp,
-    }))
+      // Add search term if available
+      if (options.searchTerm) {
+        productWithMetadata.search = options.searchTerm
+      }
 
-    // Return the data object without timestamp at top level
-    return {
-      products: productsWithTimestamp,
+      return productWithMetadata
+    })
+
+    // Return the data object
+    const formattedData = {
+      products: productsWithMetadata,
       totalProducts: products.length,
     }
+
+    // Add search term to top level if available
+    if (options.searchTerm) {
+      formattedData.searchTerm = options.searchTerm
+    }
+
+    return formattedData
   }
 
   /**
