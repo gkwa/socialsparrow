@@ -8,20 +8,13 @@
   "exports": {
     ".": "./dist/index.js"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "release": "standard-version && pnpm publish",
     "build": "vite build",
     "prepublishOnly": "pnpm run build"
   },
-  "keywords": [
-    "e-commerce",
-    "product",
-    "extraction",
-    "scraping"
-  ],
+  "keywords": ["e-commerce", "product", "extraction", "scraping"],
   "author": "Your Name",
   "license": "MIT",
   "devDependencies": {
