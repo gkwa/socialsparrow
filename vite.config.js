@@ -3,6 +3,7 @@ import { resolve } from "path"
 
 export default defineConfig({
   build: {
+    sourcemap: true, // Enable source maps
     lib: {
       entry: resolve(__dirname, "src/index.js"),
       name: "SocialSparrow",
