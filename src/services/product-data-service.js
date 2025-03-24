@@ -118,10 +118,10 @@ export class ProductDataService {
 
   /**
    * Extract products and return them
-   * @return {Array} Array of product objects
+   * @return {Object} Formatted data with products and search term
    */
   extractProducts() {
-    return this.extractAllProducts()
+    return this.getFormattedData("json")
   }
 
   /**
