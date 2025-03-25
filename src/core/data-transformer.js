@@ -24,6 +24,19 @@ export class DataTransformer {
         productWithMetadata.search = options.searchTerm
       }
 
+      // Extract and add domain from URL if URL exists
+      if (product.url && product.url !== "N/A") {
+        try {
+          const urlObj = new URL(product.url)
+          productWithMetadata.domain = urlObj.hostname
+        } catch (error) {
+          console.warn("Could not extract domain from URL:", product.url)
+          productWithMetadata.domain = "unknown"
+        }
+      } else {
+        productWithMetadata.domain = "unknown"
+      }
+
       return productWithMetadata
     })
 
