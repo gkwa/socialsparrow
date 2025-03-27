@@ -13,7 +13,7 @@ import { PCCExtractorFactory } from "./extractors/pcc-extractor-factory.js"
 import { LamsSeafoodExtractorFactory } from "./extractors/lams-seafood-extractor-factory.js"
 import { WalmartExtractorFactory } from "./extractors/walmart-extractor-factory.js"
 import { TargetExtractorFactory } from "./extractors/target-extractor-factory.js"
-
+import { SafewayExtractorFactory } from "./extractors/safeway-extractor-factory.js"
 /**
  * Abstract factory for creating website-specific extractors
  */
@@ -46,6 +46,8 @@ export class ExtractorFactory {
         return WalmartExtractorFactory.create(config)
       case "target":
         return TargetExtractorFactory.create(config)
+      case "safeway":
+        return SafewayExtractorFactory.create(config)
       default:
         // Use generic extractors for unknown websites
         extractor.setExtractors([

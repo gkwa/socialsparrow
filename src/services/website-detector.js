@@ -44,6 +44,8 @@ export class WebsiteDetector {
       document.querySelector("[data-test='@web/site-top-of-funnel/ProductCardWrapper']")
     ) {
       return "target"
+    } else if (currentUrl.includes("safeway.com") || document.querySelector(".pc-grid-prdItem")) {
+      return "safeway"
     }
     return "default"
   }

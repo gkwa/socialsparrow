@@ -1,6 +1,5 @@
 import { WebsiteConfigRegistry } from "../config/website-config-registry.js"
 import { ProductConfig } from "../config/product-config.js"
-
 /**
  * Factory for creating website configurations
  */
@@ -11,7 +10,6 @@ export class WebsiteConfigFactory {
    */
   static createConfigRegistry() {
     const registry = new WebsiteConfigRegistry()
-
     // Default configuration (generic)
     const defaultConfig = new ProductConfig({
       productContainer: ".product-card-container",
@@ -21,7 +19,6 @@ export class WebsiteConfigFactory {
       pricePattern: /\$\s*(\d+\.\d+)/,
       pricePerUnitPattern: /\(\$\s*(\d+\.\d+)\s*\/\s*([^)]+)\)/,
     })
-
     // QFC configuration
     const qfcConfig = ProductConfig.forWebsite("qfc", {
       productContainer: '[data-testid^="product-card-"]',
@@ -34,7 +31,6 @@ export class WebsiteConfigFactory {
         productSize: '[data-testid="cart-page-item-sizing"]',
       },
     })
-
     // Chef's Store configuration
     const chefsStoreConfig = ProductConfig.forWebsite("chefsstore", {
       productContainer: ".product-tile-link",
@@ -51,7 +47,6 @@ export class WebsiteConfigFactory {
         productSize: ".product-size",
       },
     })
-
     // Amazon configuration
     const amazonConfig = ProductConfig.forWebsite("amazon", {
       productContainer: '[data-component-type="s-search-result"]',
@@ -68,7 +63,6 @@ export class WebsiteConfigFactory {
         reviews: /(\d+[\d,]*)/,
       },
     })
-
     // Trader Joe's configuration
     const traderJoesConfig = ProductConfig.forWebsite("traderjoes", {
       productContainer: ".SearchResultCard_searchResultCard__3V-_h",
@@ -80,7 +74,6 @@ export class WebsiteConfigFactory {
         productImage: ".SearchResultCard_searchResultCard__image__2Yf2S img",
       },
     })
-
     // Whole Foods configuration
     const wholeFoodsConfig = ProductConfig.forWebsite("wholefoodsmarket", {
       productContainer: ".w-pie--product-tile",
@@ -95,7 +88,6 @@ export class WebsiteConfigFactory {
         price: /\$(\d+\.\d+)/,
       },
     })
-
     // PCC Markets configuration
     const pccMarketsConfig = ProductConfig.forWebsite("pcc-markets", {
       productContainer: ".e-13udsys",
@@ -111,7 +103,6 @@ export class WebsiteConfigFactory {
         price: /\$\s*(\d+\.?\d*)/,
       },
     })
-
     // Lams Seafood configuration
     const lamsSeafoodConfig = ProductConfig.forWebsite("lamss", {
       productContainer: ".sc-iJpgEM",
@@ -127,7 +118,6 @@ export class WebsiteConfigFactory {
         pricePerUnit: /\/\s*([^$]+)/,
       },
     })
-
     // Walmart configuration
     const walmartConfig = ProductConfig.forWebsite("walmart", {
       productContainer: ".sans-serif.mid-gray.relative.flex.flex-column.w-100",
@@ -146,7 +136,6 @@ export class WebsiteConfigFactory {
         price: /\$(\d+\.?\d*)/,
       },
     })
-
     // Target configuration
     const targetConfig = ProductConfig.forWebsite("target", {
       productContainer: "[data-test='@web/site-top-of-funnel/ProductCardWrapper']",
@@ -167,7 +156,23 @@ export class WebsiteConfigFactory {
         pricePerUnit: /\(\$\s*(\d+\.\d+)\s*\/\s*([^)]+)\)/,
       },
     })
-
+    // Safeway configuration
+    const safewayConfig = ProductConfig.forWebsite("safeway", {
+      productContainer: ".pc-grid-prdItem",
+      selectors: {
+        productName: "a[data-qa='prd-itm-pttl']",
+        productPrice: "[data-qa='prd-itm-prc']",
+        productUnit: "[data-qa='prd-itm-pprc-qty']",
+        productImage: "[data-qa='prd-itm-img']",
+        productTitle: ".pc__tooltip__title .title-xxs",
+        productId: "[data-bpn]",
+        productSnap: "[data-qa='prd-itm-snap']",
+      },
+      patterns: {
+        price: /\$(\d+\.\d+)/,
+        pricePerUnit: /\(\$\s*(\d+\.\d+)\s*\/\s*([^)]+)\)/,
+      },
+    })
     // Register all configurations
     return registry
       .setDefaultConfig(defaultConfig)
@@ -180,8 +185,8 @@ export class WebsiteConfigFactory {
       .registerConfig("lamss", lamsSeafoodConfig)
       .registerConfig("walmart", walmartConfig)
       .registerConfig("target", targetConfig)
+      .registerConfig("safeway", safewayConfig)
   }
-
   /**
    * Get configuration for a specific website
    * @param {string} websiteId - Website identifier
