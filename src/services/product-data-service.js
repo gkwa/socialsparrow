@@ -110,7 +110,7 @@ export class ProductDataService {
 
     // Extra debugging: check if the search term was added to products
     if (formattedData.products.length > 0 && searchTerm) {
-      console.log(`Search term in first product: ${formattedData.products[0].search}`)
+      console.log(`Search term in first product as category: ${formattedData.products[0].category}`)
     }
 
     return formattedData

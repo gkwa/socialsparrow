@@ -19,9 +19,9 @@ export class DataTransformer {
         timestamp,
       }
 
-      // Add search term if available
+      // Add search term as category if available
       if (options.searchTerm) {
-        productWithMetadata.search = options.searchTerm
+        productWithMetadata.category = options.searchTerm
       }
 
       // Extract and add domain from URL if URL exists
