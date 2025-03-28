@@ -1,5 +1,6 @@
 import { DataTransformer } from "../core/data-transformer.js"
 import { ClipboardService } from "../core/clipboard-service.js"
+import { UrlService } from "../core/url-service.js"
 import { SearchParamExtractorFactory } from "./search-param-extractor-factory.js"
 import { WebsiteDetector } from "./website-detector.js"
 import { GenericSearchParamExtractor } from "../extractors/search-param/generic-search-param-extractor.js"
@@ -32,7 +33,18 @@ export class ProductDataService {
       console.log(`Found ${productElements.length} product elements`)
       // Extract information from each product element
       const products = productElements.map((element) => this.extractor.extractProductInfo(element))
-      return products.filter((product) => product.name !== "N/A" && product.name !== "Error")
+
+      // Clean URLs in product data
+      const productsWithCleanUrls = products.map((product) => {
+        if (product.url && product.url !== "N/A" && product.url !== "Error") {
+          product.url = UrlService.cleanUrl(product.url)
+        }
+        return product
+      })
+
+      return productsWithCleanUrls.filter(
+        (product) => product.name !== "N/A" && product.name !== "Error",
+      )
     } catch (error) {
       console.error("Error extracting all products:", error)
       return []

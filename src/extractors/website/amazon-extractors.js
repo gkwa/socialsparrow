@@ -1,4 +1,5 @@
 import { BaseExtractor } from "../base-extractor.js"
+import { UrlService } from "../../core/url-service.js"
 
 /**
  * Amazon Name Extractor
@@ -40,6 +41,11 @@ export class AmazonNameExtractor extends BaseExtractor {
       // Make URL absolute if it's relative
       if (url !== "N/A" && url.startsWith("/")) {
         url = `${window.location.origin}${url}`
+      }
+
+      // Clean the URL if it's not N/A
+      if (url !== "N/A") {
+        url = UrlService.cleanUrl(url)
       }
     }
 
