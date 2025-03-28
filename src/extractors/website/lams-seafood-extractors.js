@@ -13,7 +13,7 @@ export class LamsSeafoodNameExtractor extends BaseExtractor {
       name = nameElement.textContent.trim()
 
       // Get URL from the anchor tag
-      const linkElement = element.querySelector(this.config.selectors.productLink)
+      const linkElement = element.querySelector(this.config.selectors.productLink || "a.sc-dEMAZk")
       if (linkElement) {
         url = linkElement.getAttribute("href")
         // Make URL absolute if it's relative

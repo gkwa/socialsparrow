@@ -105,13 +105,13 @@ export class WebsiteConfigFactory {
     })
     // Lams Seafood configuration
     const lamsSeafoodConfig = ProductConfig.forWebsite("lamss", {
-      productContainer: ".sc-iJpgEM",
+      productContainer: ".le-col.sc-iIPnmv",
       selectors: {
-        productName: ".sc-lopPiv",
-        productPrice: ".sc-dEMAZk",
-        productUnit: ".sc-iugpza",
-        productImage: "img.sc-gyWaIF",
-        productLink: "a.sc-jrpyRe",
+        productName: ".sc-jGONNV",
+        productPrice: ".sc-iugpza",
+        productUnit: ".sc-gMFoeA",
+        productImage: "img.sc-lopPiv",
+        productLink: "a.sc-dEMAZk",
       },
       patterns: {
         price: /\$(\d+\.\d+)/,
