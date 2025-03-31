@@ -10,10 +10,9 @@ export const lamsSeafoodConfig = {
     productPrice: ".sc-iugpza, .kldjci",
     productUnit: ".sc-gMFoeA, .lpuqvE",
     productImage: ".sc-lopPiv, .itlMCX",
-    productLink: "a.sc-dEMAZk, a.bdwhla"
+    productLink: "a.sc-dEMAZk, a.bdwhla",
   },
   patterns: {
-    price: /\$?([0-9]+\.[0-9]+)/
-  }
+    price: /\$?([0-9]+\.[0-9]+)/,
+  },
 }
-

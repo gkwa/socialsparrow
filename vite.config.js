@@ -15,11 +15,9 @@ export default defineConfig({
       },
     },
     target: "es2015",
-    minify: "terser",
-    terserOptions: {
-      mangle: {
-        keep_classnames: true,
-      },
+    minify: "esbuild",
+    esbuildOptions: {
+      keepNames: true, // Preserve class names for better debugging
     },
   },
 })
