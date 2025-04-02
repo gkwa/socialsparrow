@@ -105,7 +105,7 @@ export class TargetRatingsExtractor extends BaseExtractor {
         const ratingMask = ratingsContainer.querySelector(".styles_ratingMask__lwDAH")
         if (ratingMask) {
           const widthStyle = ratingMask.getAttribute("style")
-          const widthMatch = widthStyle.match(/width:\s*(\d+)%/)
+          const widthMatch = widthStyle?.match(/width:\s*(\d+)%/)
           if (widthMatch) {
             // Convert percentage to 5-star scale
             const percentage = parseInt(widthMatch[1])
@@ -183,7 +183,7 @@ export class TargetSponsoredExtractor extends BaseExtractor {
  */
 export class TargetSnapEligibilityExtractor extends BaseExtractor {
   extract(element) {
-    const snapElement = element.querySelector("#product-card-snap-")
+    const snapElement = element.querySelector('[id^="product-card-snap-"]')
     let snapEligible = false
 
     if (snapElement && snapElement.textContent.includes("SNAP EBT eligible")) {
