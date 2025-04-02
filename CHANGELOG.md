@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.14](https://github.com/gkwa/socialsparrow/compare/v0.3.13...v0.3.14) (2025-04-02)
+
 ### [0.3.13](https://github.com/gkwa/socialsparrow/compare/v0.3.12...v0.3.13) (2025-03-28)
 
 ### [0.3.12](https://github.com/gkwa/socialsparrow/compare/v0.3.11...v0.3.12) (2025-03-28)
