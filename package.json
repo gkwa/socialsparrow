@@ -1,6 +1,6 @@
 {
   "name": "socialsparrow",
-  "version": "0.3.14",
+  "version": "0.3.15",
   "description": "A utility for extracting product information from e-commerce websites",
   "type": "module",
   "main": "dist/index.js",
