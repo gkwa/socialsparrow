@@ -14,10 +14,10 @@ export class RawHtmlExtractor extends BaseExtractor {
     try {
       // Get the outer HTML of the element
       const rawHtml = element.outerHTML
-      
+
       // Convert to base64
       const base64Html = btoa(unescape(encodeURIComponent(rawHtml)))
-      
+
       return { rawHtml: base64Html }
     } catch (error) {
       console.error("Error extracting raw HTML:", error)

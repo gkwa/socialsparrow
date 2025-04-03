@@ -36,9 +36,16 @@ export class ProductDataService {
 
       // Clean URLs in product data
       const productsWithCleanUrls = products.map((product) => {
+        // Clean product URL
         if (product.url && product.url !== "N/A" && product.url !== "Error") {
           product.url = UrlService.cleanUrl(product.url)
         }
+
+        // Normalize image URL
+        if (product.imageUrl && product.imageUrl !== "N/A" && product.imageUrl !== "Error") {
+          product.imageUrl = UrlService.normalizeImageUrl(product.imageUrl)
+        }
+
         return product
       })
 

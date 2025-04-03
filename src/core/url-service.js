@@ -20,6 +20,41 @@ export class UrlService {
       return url // Return original URL if cleaning fails
     }
   }
+
+  /**
+   * Normalize image URLs by adding protocol if missing and cleaning parameters
+   * @param {string} imageUrl - The image URL to normalize
+   * @return {string} Normalized image URL
+   */
+  static normalizeImageUrl(imageUrl) {
+    if (!imageUrl || imageUrl === "N/A" || imageUrl === "Error") {
+      return imageUrl
+    }
+
+    try {
+      // Add https: prefix if the URL starts with double slashes
+      if (imageUrl.startsWith("//")) {
+        imageUrl = "https:" + imageUrl
+      }
+
+      // For specific domains, clean up the URL
+      if (imageUrl.includes("albertsons-media.com") || imageUrl.includes("safeway.com")) {
+        // Extract the base image ID by removing parameters
+        const baseUrlMatch = imageUrl.match(/([^?]+)/)
+        if (baseUrlMatch && baseUrlMatch[1]) {
+          imageUrl = baseUrlMatch[1]
+        }
+      }
+
+      return imageUrl
+    } catch (error) {
+      // Only log in non-test environments
+      if (process.env.NODE_ENV !== "test") {
+        console.error("Error normalizing image URL:", error)
+      }
+      return imageUrl
+    }
+  }
 }
 
 /**

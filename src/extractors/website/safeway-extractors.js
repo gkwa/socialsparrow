@@ -103,6 +103,23 @@ export class SafewayImageExtractor extends BaseExtractor {
       if (imageUrl === "N/A") {
         imageUrl = imageElement.getAttribute("data-src") || "N/A"
       }
+
+      // Process Safeway/Albertsons image URLs to clean them
+      if (imageUrl !== "N/A") {
+        // Clean Safeway/Albertsons URLs by removing parameters
+        if (imageUrl.includes("albertsons-media.com") || imageUrl.includes("safeway.com")) {
+          // Extract the base image ID by removing parameters
+          const baseUrlMatch = imageUrl.match(/([^?]+)/)
+          if (baseUrlMatch && baseUrlMatch[1]) {
+            imageUrl = baseUrlMatch[1]
+          }
+        }
+
+        // Add https prefix if the URL starts with double slashes
+        if (imageUrl.startsWith("//")) {
+          imageUrl = "https:" + imageUrl
+        }
+      }
     }
 
     return { imageUrl }
