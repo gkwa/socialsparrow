@@ -35,19 +35,32 @@ export async function initExtraction(options = {}) {
 /**
  * Extract products and return the data without copying to clipboard
  * @param {Object} customConfig - Optional custom configuration
+ * @param {Object} options - Additional options for extraction
  * @return {Array} Array of product objects
  */
-export function extractProducts(customConfig = {}) {
+export function extractProducts(customConfig = {}, options = {}) {
   const service = ProductDataServiceFactory.createDefault(customConfig)
-  return service.extractProducts()
+  return service.extractProducts(options)
 }
 
 /**
  * Extract products and copy to clipboard
  * @param {Object} customConfig - Optional custom configuration
+ * @param {Object} options - Additional options for extraction
  * @return {Promise<Object>} Extracted product data
  */
-export async function extractProductsToClipboard(customConfig = {}) {
+export async function extractProductsToClipboard(customConfig = {}, options = {}) {
   const service = ProductDataServiceFactory.createDefault(customConfig)
-  return service.extractProductsToClipboard()
+  return service.extractProductsToClipboard("json", options)
+}
+
+/**
+ * Extract a single product by ID
+ * @param {string} productId - ID of the product to extract
+ * @param {Object} customConfig - Optional custom configuration
+ * @return {Object|null} Product data or null if not found
+ */
+export function extractProductById(productId, customConfig = {}) {
+  const service = ProductDataServiceFactory.createDefault(customConfig)
+  return service.extractProductById(productId)
 }

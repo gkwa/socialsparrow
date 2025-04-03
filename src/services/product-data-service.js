@@ -39,6 +39,7 @@ export class ProductDataService {
         if (product.url && product.url !== "N/A" && product.url !== "Error") {
           product.url = UrlService.cleanUrl(product.url)
         }
+
         return product
       })
 
@@ -102,9 +103,10 @@ export class ProductDataService {
   /**
    * Extract products and format the data
    * @param {string} format - Output format
+   * @param {Object} options - Additional formatting options
    * @return {Object} Formatted data
    */
-  getFormattedData(format = "json") {
+  getFormattedData(format = "json", options = {}) {
     const products = this.extractAllProducts()
 
     // Extract search term with fallbacks
@@ -117,8 +119,23 @@ export class ProductDataService {
       console.log("No search term could be extracted from the URL")
     }
 
+    // Determine if we should include the HTML content
+    const includeHtml = options.includeHtml !== undefined ? options.includeHtml : true
+
+    // Optionally filter out HTML content if not needed to reduce payload size
+    let processedProducts = products
+    if (!includeHtml) {
+      processedProducts = products.map((product) => {
+        const { htmlContent, ...rest } = product
+        return rest
+      })
+    }
+
     // Format with search term if available
-    const formattedData = DataTransformer.formatAsJson(products, { searchTerm })
+    const formattedData = DataTransformer.formatAsJson(processedProducts, {
+      searchTerm,
+      ...options,
+    })
 
     // Extra debugging: check if the search term was added to products
     if (formattedData.products.length > 0 && searchTerm) {
@@ -130,22 +147,29 @@ export class ProductDataService {
 
   /**
    * Extract products and return them
+   * @param {Object} options - Optional extraction options
    * @return {Object} Formatted data with products and search term
    */
-  extractProducts() {
-    return this.getFormattedData("json")
+  extractProducts(options = {}) {
+    return this.getFormattedData("json", options)
   }
 
   /**
    * Extract products and copy to clipboard
    * @param {string} format - Output format
+   * @param {Object} options - Additional options
    * @return {Promise<Object>} Extracted data
    */
-  async extractProductsToClipboard(format = "json") {
+  async extractProductsToClipboard(format = "json", options = {}) {
     try {
       console.log("Starting product extraction...")
-      // Get formatted data
-      const data = this.getFormattedData(format)
+      // Get formatted data (exclude HTML by default for clipboard to avoid large data)
+      const clipboardOptions = {
+        includeHtml: options.includeHtml !== undefined ? options.includeHtml : false,
+        ...options,
+      }
+      const data = this.getFormattedData(format, clipboardOptions)
+
       if (data.products.length === 0) {
         console.warn("No products found. Check the page structure or selectors.")
         return data
@@ -161,6 +185,33 @@ export class ProductDataService {
     } catch (error) {
       console.error("❌ Error extracting products:", error)
       throw error
+    }
+  }
+
+  /**
+   * Extract a single product by ID
+   * @param {string} productId - ID of the product to extract
+   * @return {Object|null} Extracted product data or null if not found
+   */
+  extractProductById(productId) {
+    try {
+      const productElement = this.selector.findProductById(productId)
+      if (!productElement) {
+        console.warn(`Product with ID ${productId} not found`)
+        return null
+      }
+
+      const productData = this.extractor.extractProductInfo(productElement)
+
+      // Clean URL if present
+      if (productData.url && productData.url !== "N/A" && productData.url !== "Error") {
+        productData.url = UrlService.cleanUrl(productData.url)
+      }
+
+      return productData
+    } catch (error) {
+      console.error(`Error extracting product with ID ${productId}:`, error)
+      return null
     }
   }
 }

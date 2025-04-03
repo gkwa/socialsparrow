@@ -1,5 +1,6 @@
 import { BaseExtractor } from "../base-extractor.js"
 import { UrlService } from "../../core/url-service.js"
+import { DataTransformer } from "../../core/data-transformer.js"
 
 /**
  * Amazon Name Extractor
@@ -178,5 +179,32 @@ export class AmazonImageExtractor extends BaseExtractor {
     }
 
     return { imageUrl }
+  }
+}
+
+/**
+ * Amazon HTML Content Extractor
+ */
+export class AmazonHtmlContentExtractor extends BaseExtractor {
+  extract(element) {
+    try {
+      // Create a clone of the element to avoid modifying the original
+      const cloneElement = element.cloneNode(true)
+
+      // Get the HTML content
+      const htmlContent = cloneElement.outerHTML
+
+      // Base64 encode the HTML content
+      const encodedHtml = DataTransformer.encodeHtmlToBase64(htmlContent)
+
+      return {
+        htmlContent: encodedHtml || "N/A",
+      }
+    } catch (error) {
+      console.error("Error extracting Amazon HTML content:", error)
+      return {
+        htmlContent: "N/A",
+      }
+    }
   }
 }

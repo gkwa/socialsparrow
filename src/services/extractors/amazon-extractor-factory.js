@@ -5,6 +5,7 @@ import {
   AmazonRatingsExtractor,
   AmazonVariantExtractor,
   AmazonImageExtractor,
+  AmazonHtmlContentExtractor,
 } from "../../extractors/website/amazon-extractors.js"
 
 /**
@@ -24,6 +25,7 @@ export class AmazonExtractorFactory {
       new AmazonRatingsExtractor(config),
       new AmazonVariantExtractor(config),
       new AmazonImageExtractor(config),
+      new AmazonHtmlContentExtractor(config),
     ])
     return extractor
   }
