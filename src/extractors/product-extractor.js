@@ -3,6 +3,7 @@ import { NameExtractor } from "./generic/name-extractor.js"
 import { PriceExtractor } from "./generic/price-extractor.js"
 import { PricePerUnitExtractor } from "./generic/price-per-unit-extractor.js"
 import { RawTextExtractor } from "./generic/raw-text-extractor.js"
+import { RawHtmlExtractor } from "./generic/raw-html-extractor.js"
 
 /**
  * Composite extractor that combines multiple extractors
@@ -16,6 +17,7 @@ export class ProductExtractor {
       new PriceExtractor(config),
       new PricePerUnitExtractor(config),
       new RawTextExtractor(config), // Added the RawTextExtractor by default
+      new RawHtmlExtractor(config), // Added the RawHtmlExtractor by default
     ]
   }
 
@@ -34,9 +36,14 @@ export class ProductExtractor {
   setExtractors(extractors) {
     // Ensure the RawTextExtractor is always included
     const hasRawTextExtractor = extractors.some((e) => e instanceof RawTextExtractor)
+    const hasRawHtmlExtractor = extractors.some((e) => e instanceof RawHtmlExtractor)
 
     if (!hasRawTextExtractor) {
       extractors.push(new RawTextExtractor(this.config))
+    }
+
+    if (!hasRawHtmlExtractor) {
+      extractors.push(new RawHtmlExtractor(this.config))
     }
 
     this.extractors = extractors
@@ -61,6 +68,7 @@ export class ProductExtractor {
         pricePerUnit: "Error",
         url: "Error",
         rawTextContent: "Error extracting content",
+        rawHtml: "Error extracting HTML",
       }
     }
   }
