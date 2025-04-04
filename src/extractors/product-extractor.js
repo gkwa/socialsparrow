@@ -4,6 +4,7 @@ import { PriceExtractor } from "./generic/price-extractor.js"
 import { PricePerUnitExtractor } from "./generic/price-per-unit-extractor.js"
 import { RawTextExtractor } from "./generic/raw-text-extractor.js"
 import { RawHtmlExtractor } from "./generic/raw-html-extractor.js"
+import { UrlAbsolutizer } from "../core/url-absolutizer.js"
 
 /**
  * Composite extractor that combines multiple extractors
@@ -19,6 +20,9 @@ export class ProductExtractor {
       new RawTextExtractor(config), // Added the RawTextExtractor by default
       new RawHtmlExtractor(config), // Added the RawHtmlExtractor by default
     ]
+
+    // Flag to control whether to absolutize URLs before HTML extraction
+    this.absolutizeUrls = config.absolutizeUrls !== false
   }
 
   /**
@@ -56,9 +60,24 @@ export class ProductExtractor {
    */
   extractProductInfo(element) {
     try {
-      // Apply all extractors and merge the results
+      // For HTML extraction, we need to ensure all URLs are absolute
+      // We'll use a special element for the RawHtmlExtractor
+      let elementForHtmlExtraction = element
+
+      // If URL absolutization is enabled
+      if (this.absolutizeUrls) {
+        // Clone the element and absolutize URLs in the clone
+        elementForHtmlExtraction = UrlAbsolutizer.cloneWithAbsoluteUrls(element)
+      }
+
+      // Apply all extractors with the appropriate element
       return this.extractors.reduce((result, extractor) => {
-        return { ...result, ...extractor.extract(element) }
+        // Use absolutized element only for RawHtmlExtractor
+        const elementToUse = extractor instanceof RawHtmlExtractor
+          ? elementForHtmlExtraction
+          : element
+
+        return { ...result, ...extractor.extract(elementToUse) }
       }, {})
     } catch (error) {
       console.error("Error extracting product info:", error)
