@@ -11,88 +11,178 @@ export class UrlAbsolutizer {
   static absolutizeUrls(element) {
     try {
       // Process all links (a href)
-      const links = element.querySelectorAll('a[href]')
-      links.forEach(link => {
-        const href = link.getAttribute('href')
-        if (href && (href.startsWith('/') || href.startsWith('./') || href.startsWith('../'))) {
-          link.setAttribute('href', new URL(href, window.location.origin).href)
+      const links = element.querySelectorAll("a[href]")
+      links.forEach((link) => {
+        const href = link.getAttribute("href")
+        if (href && (href.startsWith("/") || href.startsWith("./") || href.startsWith("../"))) {
+          link.setAttribute("href", new URL(href, window.location.origin).href)
         }
       })
 
-      // Process all images (img src)
-      const images = element.querySelectorAll('img[src]')
-      images.forEach(img => {
-        const src = img.getAttribute('src')
-        if (src) {
-          // Handle protocol-relative URLs (starting with //)
-          if (src.startsWith('//')) {
-            img.setAttribute('src', 'https:' + src)
+      // Process all images (img src, data-src)
+      const images = element.querySelectorAll("img")
+      images.forEach((img) => {
+        // Handle src attribute
+        if (img.hasAttribute("src")) {
+          const src = img.getAttribute("src")
+          if (src.startsWith("//")) {
+            img.setAttribute("src", "https:" + src)
+          } else if (src.startsWith("/") || src.startsWith("./") || src.startsWith("../")) {
+            img.setAttribute("src", new URL(src, window.location.origin).href)
           }
-          // Handle relative URLs
-          else if (src.startsWith('/') || src.startsWith('./') || src.startsWith('../')) {
-            img.setAttribute('src', new URL(src, window.location.origin).href)
+        }
+
+        // Handle data-src attribute
+        if (img.hasAttribute("data-src")) {
+          const dataSrc = img.getAttribute("data-src")
+          if (dataSrc.startsWith("//")) {
+            img.setAttribute("data-src", "https:" + dataSrc)
+          } else if (
+            dataSrc.startsWith("/") ||
+            dataSrc.startsWith("./") ||
+            dataSrc.startsWith("../")
+          ) {
+            img.setAttribute("data-src", new URL(dataSrc, window.location.origin).href)
           }
         }
       })
 
-      // Process all source elements (for picture elements)
-      const sources = element.querySelectorAll('source[srcset]')
-      sources.forEach(source => {
-        const srcset = source.getAttribute('srcset')
-        if (srcset) {
-          // Process srcset format: "url1 1x, url2 2x"
-          const newSrcset = srcset.split(',').map(src => {
-            const parts = src.trim().split(' ')
-            let url = parts[0]
-            const descriptor = parts[1] || ''
+      // Process all elements with data-srcset attribute
+      const elementsWithDataSrcset = element.querySelectorAll("[data-srcset]")
+      elementsWithDataSrcset.forEach((el) => {
+        const dataSrcset = el.getAttribute("data-srcset")
+        if (dataSrcset) {
+          // Process each URL in the srcset
+          const newSrcset = dataSrcset
+            .split(",")
+            .map((part) => {
+              const parts = part.trim().split(" ")
+              let url = parts[0]
+              const descriptor = parts.slice(1).join(" ") // Keep any descriptors (like 1x, 2x, etc.)
 
-            // Handle protocol-relative URLs
-            if (url.startsWith('//')) {
-              url = 'https:' + url
+              // Fix protocol-relative URLs
+              if (url.startsWith("//")) {
+                url = "https:" + url
+              }
+              // Fix relative URLs
+              else if (url.startsWith("/") || url.startsWith("./") || url.startsWith("../")) {
+                url = new URL(url, window.location.origin).href
+              }
+
+              return url + (descriptor ? " " + descriptor : "")
+            })
+            .join(", ")
+
+          el.setAttribute("data-srcset", newSrcset)
+        }
+      })
+
+      // Process all source elements (they often have srcset and data-srcset)
+      const sources = element.querySelectorAll("source")
+      sources.forEach((source) => {
+        // Handle srcset attribute
+        if (source.hasAttribute("srcset")) {
+          const srcset = source.getAttribute("srcset")
+          const newSrcset = srcset
+            .split(",")
+            .map((part) => {
+              const parts = part.trim().split(" ")
+              let url = parts[0]
+              const descriptor = parts.slice(1).join(" ")
+
+              if (url.startsWith("//")) {
+                url = "https:" + url
+              } else if (url.startsWith("/") || url.startsWith("./") || url.startsWith("../")) {
+                url = new URL(url, window.location.origin).href
+              }
+
+              return url + (descriptor ? " " + descriptor : "")
+            })
+            .join(", ")
+
+          source.setAttribute("srcset", newSrcset)
+        }
+
+        // Handle data-srcset attribute (already covered by the selector above, but keeping for clarity)
+        if (source.hasAttribute("data-srcset")) {
+          const dataSrcset = source.getAttribute("data-srcset")
+          const newDataSrcset = dataSrcset
+            .split(",")
+            .map((part) => {
+              const parts = part.trim().split(" ")
+              let url = parts[0]
+              const descriptor = parts.slice(1).join(" ")
+
+              if (url.startsWith("//")) {
+                url = "https:" + url
+              } else if (url.startsWith("/") || url.startsWith("./") || url.startsWith("../")) {
+                url = new URL(url, window.location.origin).href
+              }
+
+              return url + (descriptor ? " " + descriptor : "")
+            })
+            .join(", ")
+
+          source.setAttribute("data-srcset", newDataSrcset)
+        }
+      })
+
+      // Process all elements with any other data-* attribute that might contain URLs
+      const allElements = element.querySelectorAll("*")
+      allElements.forEach((el) => {
+        Array.from(el.attributes).forEach((attr) => {
+          if (
+            attr.name.startsWith("data-") &&
+            attr.name !== "data-src" && // Skip those we've already handled
+            attr.name !== "data-srcset" &&
+            typeof attr.value === "string"
+          ) {
+            // Check if attribute value might be a URL
+            const value = attr.value
+            if (value.startsWith("//")) {
+              // Protocol-relative URL
+              el.setAttribute(attr.name, "https:" + value)
+            } else if (value.startsWith("/") || value.startsWith("./") || value.startsWith("../")) {
+              // Relative URL
+              el.setAttribute(attr.name, new URL(value, window.location.origin).href)
+            } else if (
+              value.includes("/") &&
+              (value.includes(".jpg") ||
+                value.includes(".png") ||
+                value.includes(".gif") ||
+                value.includes(".webp") ||
+                value.includes(".svg") ||
+                value.includes("image") ||
+                value.includes("media"))
+            ) {
+              // Try to detect URLs that don't start with standard URL prefixes
+              // This is a heuristic approach, might need adjustment
+              try {
+                const possibleUrl = new URL(value, window.location.origin)
+                el.setAttribute(attr.name, possibleUrl.href)
+              } catch (e) {
+                // Not a valid URL, ignore
+              }
             }
-            // Handle relative URLs
-            else if (url.startsWith('/') || url.startsWith('./') || url.startsWith('../')) {
-              url = new URL(url, window.location.origin).href
-            }
-
-            return `${url} ${descriptor}`.trim()
-          }).join(', ')
-
-          source.setAttribute('srcset', newSrcset)
-        }
-      })
-
-      // Process all data-src attributes (lazy-loaded images)
-      const lazyImages = element.querySelectorAll('[data-src]')
-      lazyImages.forEach(img => {
-        const dataSrc = img.getAttribute('data-src')
-        if (dataSrc) {
-          // Handle protocol-relative URLs
-          if (dataSrc.startsWith('//')) {
-            img.setAttribute('data-src', 'https:' + dataSrc)
           }
-          // Handle relative URLs
-          else if (dataSrc.startsWith('/') || dataSrc.startsWith('./') || dataSrc.startsWith('../')) {
-            img.setAttribute('data-src', new URL(dataSrc, window.location.origin).href)
-          }
-        }
+        })
       })
 
       // Process background images in style attributes
-      const elementsWithStyle = element.querySelectorAll('[style*="background"]')
-      elementsWithStyle.forEach(el => {
-        const style = el.getAttribute('style')
-        if (style && style.includes('url(')) {
+      const elementsWithStyle = element.querySelectorAll('[style*="url("]')
+      elementsWithStyle.forEach((el) => {
+        const style = el.getAttribute("style")
+        if (style) {
           // Find all url() occurrences and replace relative paths
           const newStyle = style.replace(/url\(['"]?([^'")]+)['"]?\)/g, (match, url) => {
-            if (url.startsWith('//')) {
+            if (url.startsWith("//")) {
               return `url('https:${url}')`
-            } else if (url.startsWith('/') || url.startsWith('./') || url.startsWith('../')) {
+            } else if (url.startsWith("/") || url.startsWith("./") || url.startsWith("../")) {
               return `url('${new URL(url, window.location.origin).href}')`
             }
             return match
           })
-          el.setAttribute('style', newStyle)
+          el.setAttribute("style", newStyle)
         }
       })
 

@@ -17,10 +17,9 @@ export class ProductExtractor {
       new NameExtractor(config),
       new PriceExtractor(config),
       new PricePerUnitExtractor(config),
-      new RawTextExtractor(config), // Added the RawTextExtractor by default
-      new RawHtmlExtractor(config), // Added the RawHtmlExtractor by default
+      new RawTextExtractor(config),
+      new RawHtmlExtractor(config),
     ]
-
     // Flag to control whether to absolutize URLs before HTML extraction
     this.absolutizeUrls = config.absolutizeUrls !== false
   }
@@ -38,14 +37,13 @@ export class ProductExtractor {
    * @param {Array<BaseExtractor>} extractors - The extractors to set
    */
   setExtractors(extractors) {
-    // Ensure the RawTextExtractor is always included
+    // Ensure the RawTextExtractor and RawHtmlExtractor are always included
     const hasRawTextExtractor = extractors.some((e) => e instanceof RawTextExtractor)
     const hasRawHtmlExtractor = extractors.some((e) => e instanceof RawHtmlExtractor)
 
     if (!hasRawTextExtractor) {
       extractors.push(new RawTextExtractor(this.config))
     }
-
     if (!hasRawHtmlExtractor) {
       extractors.push(new RawHtmlExtractor(this.config))
     }
@@ -60,25 +58,26 @@ export class ProductExtractor {
    */
   extractProductInfo(element) {
     try {
-      // For HTML extraction, we need to ensure all URLs are absolute
-      // We'll use a special element for the RawHtmlExtractor
-      let elementForHtmlExtraction = element
+      // First, make a clone of the element with absolutized URLs for HTML extraction
+      const elementForHtmlExtraction = this.absolutizeUrls
+        ? UrlAbsolutizer.cloneWithAbsoluteUrls(element)
+        : element
 
-      // If URL absolutization is enabled
-      if (this.absolutizeUrls) {
-        // Clone the element and absolutize URLs in the clone
-        elementForHtmlExtraction = UrlAbsolutizer.cloneWithAbsoluteUrls(element)
+      // Create result object
+      let result = {}
+
+      // Apply all extractors, but handle RawHtmlExtractor separately
+      for (const extractor of this.extractors) {
+        if (extractor instanceof RawHtmlExtractor) {
+          // Use the absolutized element for HTML extraction
+          Object.assign(result, extractor.extract(elementForHtmlExtraction))
+        } else {
+          // Use the original element for all other extractors
+          Object.assign(result, extractor.extract(element))
+        }
       }
 
-      // Apply all extractors with the appropriate element
-      return this.extractors.reduce((result, extractor) => {
-        // Use absolutized element only for RawHtmlExtractor
-        const elementToUse = extractor instanceof RawHtmlExtractor
-          ? elementForHtmlExtraction
-          : element
-
-        return { ...result, ...extractor.extract(elementToUse) }
-      }, {})
+      return result
     } catch (error) {
       console.error("Error extracting product info:", error)
       return {
