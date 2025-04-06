@@ -8,10 +8,7 @@
   "exports": {
     ".": "./dist/index.js"
   },
-  "files": [
-    "dist",
-    "dist/*.map"
-  ],
+  "files": ["dist", "dist/*.map"],
   "scripts": {
     "release": "standard-version && pnpm publish",
     "build": "vite build",
@@ -20,12 +17,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
-  "keywords": [
-    "e-commerce",
-    "product",
-    "extraction",
-    "scraping"
-  ],
+  "keywords": ["e-commerce", "product", "extraction", "scraping"],
   "author": "Your Name",
   "license": "MIT",
   "devDependencies": {

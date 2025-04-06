@@ -185,6 +185,7 @@ export class AmazonUrlCleaner extends BaseUrlCleaner {
     }
   }
 }
+
 /**
  * Safeway/Albertsons URL cleaner
  */
@@ -223,6 +224,7 @@ export class SafewayAlbertsonsUrlCleaner extends BaseUrlCleaner {
     }
   }
 }
+
 /**
  * Factory for creating URL cleaners based on the URL
  */
