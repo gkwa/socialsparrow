@@ -185,7 +185,44 @@ export class AmazonUrlCleaner extends BaseUrlCleaner {
     }
   }
 }
+/**
+ * Safeway/Albertsons URL cleaner
+ */
+export class SafewayAlbertsonsUrlCleaner extends BaseUrlCleaner {
+  /**
+   * Clean a Safeway or Albertsons URL
+   * @param {string} url - The URL to clean
+   * @return {string} Cleaned URL
+   */
+  clean(url) {
+    try {
+      const parsedUrl = new URL(url)
 
+      // First apply generic cleaning to remove common tracking parameters
+      const genericCleaner = new GenericUrlCleaner()
+      const partiallyCleanedUrl = genericCleaner.clean(url)
+      const reParsedUrl = new URL(partiallyCleanedUrl)
+
+      // Check for product detail URLs
+      if (parsedUrl.pathname.includes("/shop/product-details")) {
+        // Extract the product ID from the pathname
+        const productIdMatch = parsedUrl.pathname.match(/product-details\.(\d+)\.html/)
+        if (productIdMatch && productIdMatch[1]) {
+          const productId = productIdMatch[1]
+          // Construct a clean product URL
+          return `${parsedUrl.origin}/shop/product-details.${productId}.html`
+        }
+      }
+
+      // If this is not a product URL or we couldn't find the product ID pattern,
+      // return the URL with just tracking parameters removed
+      return partiallyCleanedUrl
+    } catch (error) {
+      console.error("Error in SafewayAlbertsonsUrlCleaner:", error)
+      return url
+    }
+  }
+}
 /**
  * Factory for creating URL cleaners based on the URL
  */
@@ -200,6 +237,8 @@ export class UrlCleanerFactory {
       // Check the domain to determine which cleaner to use
       if (url.includes("amazon.")) {
         return new AmazonUrlCleaner()
+      } else if (url.includes("safeway.com") || url.includes("albertsons.com")) {
+        return new SafewayAlbertsonsUrlCleaner()
       }
 
       // Add more website-specific cleaners here as needed

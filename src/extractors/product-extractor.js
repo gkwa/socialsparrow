@@ -58,10 +58,17 @@ export class ProductExtractor {
    */
   extractProductInfo(element) {
     try {
-      // First, make a clone of the element with absolutized URLs for HTML extraction
-      const elementForHtmlExtraction = this.absolutizeUrls
-        ? UrlAbsolutizer.cloneWithAbsoluteUrls(element)
-        : element
+      // For HTML extraction, we need to ensure all URLs are absolute and cleaned
+      let elementForHtmlExtraction = element
+
+      // If URL absolutization is enabled
+      if (this.absolutizeUrls) {
+        // Clone the element and absolutize URLs in the clone
+        elementForHtmlExtraction = UrlAbsolutizer.cloneWithAbsoluteUrls(element)
+
+        // Additionally, clean image URLs in the clone specifically for websites
+        this.cleanImageUrlsInElement(elementForHtmlExtraction)
+      }
 
       // Create result object
       let result = {}
@@ -88,6 +95,101 @@ export class ProductExtractor {
         rawTextContent: "Error extracting content",
         rawHtml: "Error extracting HTML",
       }
+    }
+  }
+
+  /**
+   * Clean image URLs in an element, particularly for specific websites
+   * @param {HTMLElement} element - The element to process
+   * @return {HTMLElement} The element with cleaned image URLs
+   */
+  cleanImageUrlsInElement(element) {
+    try {
+      // Find all image elements
+      const images = element.querySelectorAll("img[src], img[data-src]")
+      images.forEach((img) => {
+        // Clean src attribute if present
+        if (img.hasAttribute("src")) {
+          let src = img.getAttribute("src")
+          // Apply the same cleaning logic as in UrlService.normalizeImageUrl
+          if (src.includes("albertsons-media.com") || src.includes("safeway.com")) {
+            const baseUrlMatch = src.match(/([^?]+)/)
+            if (baseUrlMatch && baseUrlMatch[1]) {
+              img.setAttribute("src", baseUrlMatch[1])
+            }
+          }
+        }
+
+        // Clean data-src attribute if present
+        if (img.hasAttribute("data-src")) {
+          let dataSrc = img.getAttribute("data-src")
+          if (dataSrc.includes("albertsons-media.com") || dataSrc.includes("safeway.com")) {
+            const baseUrlMatch = dataSrc.match(/([^?]+)/)
+            if (baseUrlMatch && baseUrlMatch[1]) {
+              img.setAttribute("data-src", baseUrlMatch[1])
+            }
+          }
+        }
+      })
+
+      // Find all source elements with srcset or data-srcset
+      const sources = element.querySelectorAll("source[srcset], source[data-srcset]")
+      sources.forEach((source) => {
+        // Handle srcset attribute
+        if (source.hasAttribute("srcset")) {
+          let srcset = source.getAttribute("srcset")
+          // Clean each URL in the srcset
+          const newSrcset = srcset
+            .split(",")
+            .map((src) => {
+              const parts = src.trim().split(" ")
+              let url = parts[0]
+              const descriptor = parts.slice(1).join(" ")
+
+              if (url.includes("albertsons-media.com") || url.includes("safeway.com")) {
+                const baseUrlMatch = url.match(/([^?]+)/)
+                if (baseUrlMatch && baseUrlMatch[1]) {
+                  url = baseUrlMatch[1]
+                }
+              }
+
+              return url + (descriptor ? " " + descriptor : "")
+            })
+            .join(", ")
+
+          source.setAttribute("srcset", newSrcset)
+        }
+
+        // Handle data-srcset attribute
+        if (source.hasAttribute("data-srcset")) {
+          let dataSrcset = source.getAttribute("data-srcset")
+          // Clean each URL in the data-srcset
+          const newDataSrcset = dataSrcset
+            .split(",")
+            .map((src) => {
+              const parts = src.trim().split(" ")
+              let url = parts[0]
+              const descriptor = parts.slice(1).join(" ")
+
+              if (url.includes("albertsons-media.com") || url.includes("safeway.com")) {
+                const baseUrlMatch = url.match(/([^?]+)/)
+                if (baseUrlMatch && baseUrlMatch[1]) {
+                  url = baseUrlMatch[1]
+                }
+              }
+
+              return url + (descriptor ? " " + descriptor : "")
+            })
+            .join(", ")
+
+          source.setAttribute("data-srcset", newDataSrcset)
+        }
+      })
+
+      return element
+    } catch (error) {
+      console.error("Error cleaning image URLs in element:", error)
+      return element
     }
   }
 }
