@@ -15,8 +15,11 @@ export class RawHtmlExtractor extends BaseExtractor {
       // Get the outer HTML of the element
       const rawHtml = element.outerHTML
 
+      // Normalize newlines to spaces
+      const normalizedHtml = rawHtml.replace(/\s+/g, " ").trim()
+
       // Convert to base64
-      const base64Html = btoa(unescape(encodeURIComponent(rawHtml)))
+      const base64Html = btoa(unescape(encodeURIComponent(normalizedHtml)))
 
       return { rawHtml: base64Html }
     } catch (error) {
