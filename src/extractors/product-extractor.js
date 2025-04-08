@@ -4,8 +4,8 @@ import { PriceExtractor } from "./generic/price-extractor.js"
 import { PricePerUnitExtractor } from "./generic/price-per-unit-extractor.js"
 import { RawTextExtractor } from "./generic/raw-text-extractor.js"
 import { RawHtmlExtractor } from "./generic/raw-html-extractor.js"
-import { UrlAbsolutizer } from "../core/url-absolutizer.js"
-import { UrlService } from "../core/url-service.js"
+import { UrlAbsolutizer, UrlProcessor } from "../core/url-absolutizer.js"
+import { UrlService, UrlCleanerFactory } from "../core/url-service.js"
 
 /**
  * Composite extractor that combines multiple extractors
@@ -64,11 +64,11 @@ export class ProductExtractor {
 
       // If URL absolutization is enabled
       if (this.absolutizeUrls) {
-        // Clone the element with absolute and cleaned URLs
-        elementForHtmlExtraction = UrlAbsolutizer.cloneWithAbsoluteAndCleanUrls(
-          element,
-          UrlService.cleanUrl,
-        )
+        // Get appropriate URL cleaner
+        const urlCleaner = UrlCleanerFactory.createForUrl(window.location.href)
+
+        // Use the UrlProcessor to combine absolutization and cleaning
+        elementForHtmlExtraction = UrlProcessor.cloneWithProcessedUrls(element, urlCleaner)
 
         // Additionally, clean image URLs in the clone specifically for websites
         this.cleanImageUrlsInElement(elementForHtmlExtraction)

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest"
 import {
   AmazonUrlCleaner,
   GenericUrlCleaner,
@@ -8,6 +8,17 @@ import {
 } from "../../src/core/url-service.js"
 
 describe("UrlService", () => {
+  beforeEach(() => {
+    // Silence console output during tests
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.spyOn(console, "log").mockImplementation(() => {})
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it("should clean Amazon product URLs", () => {
     const dirtyUrl =
       "https://www.amazon.com/SwissGear-Travel-Backpacks-Black-21-5/dp/B079R47PHD/ref=asc_df_B097WDNHXM/?tag=hyprod-20&linkCode=df0&hvadid=692875362841&hvpos=&hvnetw=g&hvrand=12501309312931971926&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9061293&hvtargid=pla-2281435178138&mcid=893407ed59c63375922d66964cedd471&hvocijid=12501309312931971926-B097WDNHXM-&hvexpln=73&th=1"
@@ -38,6 +49,17 @@ describe("UrlService", () => {
 })
 
 describe("GenericUrlCleaner", () => {
+  beforeEach(() => {
+    // Silence console output during tests
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.spyOn(console, "log").mockImplementation(() => {})
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   const cleaner = new GenericUrlCleaner()
   it("should remove common tracking parameters", () => {
     const dirtyUrl =
@@ -66,6 +88,17 @@ describe("GenericUrlCleaner", () => {
 })
 
 describe("WalmartUrlCleaner", () => {
+  beforeEach(() => {
+    // Silence console output during tests
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    vi.spyOn(console, "log").mockImplementation(() => {})
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   const cleaner = new WalmartUrlCleaner()
 
   it("should clean Walmart tracking URLs", () => {

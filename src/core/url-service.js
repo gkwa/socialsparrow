@@ -63,6 +63,7 @@ export class UrlService {
     }
   }
 }
+
 /**
  * Base interface for URL cleaners
  * Follows Interface Segregation Principle
@@ -76,7 +77,53 @@ export class BaseUrlCleaner {
   clean(url) {
     throw new Error("Method must be implemented by subclass")
   }
+
+  /**
+   * Apply cleaning to all URLs in an element
+   * @param {HTMLElement} element - DOM element to process
+   * @return {HTMLElement} Element with cleaned URLs
+   */
+  cleanUrlsInElement(element) {
+    try {
+      if (!element) return element
+
+      // Find all anchor elements with href attributes
+      const links = element.querySelectorAll("a[href]")
+      links.forEach((link) => {
+        const href = link.getAttribute("href")
+        if (href && href.trim() !== "") {
+          const cleanedUrl = this.clean(href)
+          if (cleanedUrl) {
+            link.setAttribute("href", cleanedUrl)
+          }
+        }
+      })
+      return element
+    } catch (error) {
+      console.error("Error cleaning URLs in element:", error)
+      return element
+    }
+  }
+
+  /**
+   * Create a clone of the element with all URLs cleaned
+   * @param {HTMLElement} element - DOM element to process
+   * @return {HTMLElement} A cloned element with cleaned URLs
+   */
+  cloneWithCleanUrls(element) {
+    try {
+      // Clone the element
+      const clone = element.cloneNode(true)
+      // Clean URLs in the clone
+      return this.cleanUrlsInElement(clone)
+    } catch (error) {
+      console.error("Error cloning and cleaning URLs:", error)
+      // Return a simple clone if operation fails
+      return element.cloneNode(true)
+    }
+  }
 }
+
 /**
  * Generic URL cleaner that removes common tracking parameters
  */
@@ -146,6 +193,7 @@ export class GenericUrlCleaner extends BaseUrlCleaner {
     }
   }
 }
+
 /**
  * Amazon-specific URL cleaner
  */
@@ -224,6 +272,7 @@ export class AmazonUrlCleaner extends BaseUrlCleaner {
     }
   }
 }
+
 /**
  * Safeway/Albertsons URL cleaner
  */

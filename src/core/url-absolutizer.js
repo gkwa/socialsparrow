@@ -4,192 +4,55 @@
  */
 export class UrlAbsolutizer {
   /**
+   * Convert a single URL from relative to absolute
+   * @param {string} url - The URL to convert
+   * @param {string} baseUrl - The base URL to use (defaults to current page origin)
+   * @return {string} Absolute URL
+   */
+  static makeAbsolute(url, baseUrl = window.location.origin) {
+    if (!url) return url
+
+    // Handle protocol-relative URLs
+    if (url.startsWith("//")) {
+      return `https:${url}`
+    }
+
+    // Handle relative URLs
+    if (url.startsWith("/") || url.startsWith("./") || url.startsWith("../")) {
+      return new URL(url, baseUrl).href
+    }
+
+    return url
+  }
+
+  /**
    * Convert all relative URLs in a DOM element to absolute URLs
    * @param {HTMLElement} element - DOM element to process
+   * @param {string} baseUrl - The base URL to use (defaults to current page origin)
    * @return {HTMLElement} The same element with modified URLs (operation is in-place)
    */
-  static absolutizeUrls(element) {
+  static absolutizeUrls(element, baseUrl = window.location.origin) {
     try {
-      // Process all links (a href)
-      const links = element.querySelectorAll("a[href]")
-      links.forEach((link) => {
-        const href = link.getAttribute("href")
-        if (href && (href.startsWith("/") || href.startsWith("./") || href.startsWith("../"))) {
-          link.setAttribute("href", new URL(href, window.location.origin).href)
-        }
-      })
+      if (!element) return element
 
-      // Process all images (img src, data-src)
-      const images = element.querySelectorAll("img")
-      images.forEach((img) => {
-        // Handle src attribute
-        if (img.hasAttribute("src")) {
-          const src = img.getAttribute("src")
-          if (src.startsWith("//")) {
-            img.setAttribute("src", "https:" + src)
-          } else if (src.startsWith("/") || src.startsWith("./") || src.startsWith("../")) {
-            img.setAttribute("src", new URL(src, window.location.origin).href)
-          }
-        }
+      // Process link URLs
+      this._processLinkUrls(element, baseUrl)
 
-        // Handle data-src attribute
-        if (img.hasAttribute("data-src")) {
-          const dataSrc = img.getAttribute("data-src")
-          if (dataSrc.startsWith("//")) {
-            img.setAttribute("data-src", "https:" + dataSrc)
-          } else if (
-            dataSrc.startsWith("/") ||
-            dataSrc.startsWith("./") ||
-            dataSrc.startsWith("../")
-          ) {
-            img.setAttribute("data-src", new URL(dataSrc, window.location.origin).href)
-          }
-        }
-      })
+      // Process image URLs
+      this._processImageUrls(element, baseUrl)
 
-      // Process all elements with data-srcset attribute
-      const elementsWithDataSrcset = element.querySelectorAll("[data-srcset]")
-      elementsWithDataSrcset.forEach((el) => {
-        const dataSrcset = el.getAttribute("data-srcset")
-        if (dataSrcset) {
-          // Process each URL in the srcset
-          const newSrcset = dataSrcset
-            .split(",")
-            .map((part) => {
-              const parts = part.trim().split(" ")
-              let url = parts[0]
-              const descriptor = parts.slice(1).join(" ") // Keep any descriptors (like 1x, 2x, etc.)
+      // Process srcset attributes
+      this._processSrcsetAttributes(element, baseUrl)
 
-              // Fix protocol-relative URLs
-              if (url.startsWith("//")) {
-                url = "https:" + url
-              }
-              // Fix relative URLs
-              else if (url.startsWith("/") || url.startsWith("./") || url.startsWith("../")) {
-                url = new URL(url, window.location.origin).href
-              }
+      // Process CSS background URLs
+      this._processBackgroundUrls(element, baseUrl)
 
-              return url + (descriptor ? " " + descriptor : "")
-            })
-            .join(", ")
-
-          el.setAttribute("data-srcset", newSrcset)
-        }
-      })
-
-      // Process all source elements (they often have srcset and data-srcset)
-      const sources = element.querySelectorAll("source")
-      sources.forEach((source) => {
-        // Handle srcset attribute
-        if (source.hasAttribute("srcset")) {
-          const srcset = source.getAttribute("srcset")
-          const newSrcset = srcset
-            .split(",")
-            .map((part) => {
-              const parts = part.trim().split(" ")
-              let url = parts[0]
-              const descriptor = parts.slice(1).join(" ")
-
-              if (url.startsWith("//")) {
-                url = "https:" + url
-              } else if (url.startsWith("/") || url.startsWith("./") || url.startsWith("../")) {
-                url = new URL(url, window.location.origin).href
-              }
-
-              return url + (descriptor ? " " + descriptor : "")
-            })
-            .join(", ")
-
-          source.setAttribute("srcset", newSrcset)
-        }
-
-        // Handle data-srcset attribute (already covered by the selector above, but keeping for clarity)
-        if (source.hasAttribute("data-srcset")) {
-          const dataSrcset = source.getAttribute("data-srcset")
-          const newDataSrcset = dataSrcset
-            .split(",")
-            .map((part) => {
-              const parts = part.trim().split(" ")
-              let url = parts[0]
-              const descriptor = parts.slice(1).join(" ")
-
-              if (url.startsWith("//")) {
-                url = "https:" + url
-              } else if (url.startsWith("/") || url.startsWith("./") || url.startsWith("../")) {
-                url = new URL(url, window.location.origin).href
-              }
-
-              return url + (descriptor ? " " + descriptor : "")
-            })
-            .join(", ")
-
-          source.setAttribute("data-srcset", newDataSrcset)
-        }
-      })
-
-      // Process all elements with any other data-* attribute that might contain URLs
-      const allElements = element.querySelectorAll("*")
-      allElements.forEach((el) => {
-        Array.from(el.attributes).forEach((attr) => {
-          if (
-            attr.name.startsWith("data-") &&
-            attr.name !== "data-src" && // Skip those we've already handled
-            attr.name !== "data-srcset" &&
-            typeof attr.value === "string"
-          ) {
-            // Check if attribute value might be a URL
-            const value = attr.value
-            if (value.startsWith("//")) {
-              // Protocol-relative URL
-              el.setAttribute(attr.name, "https:" + value)
-            } else if (value.startsWith("/") || value.startsWith("./") || value.startsWith("../")) {
-              // Relative URL
-              el.setAttribute(attr.name, new URL(value, window.location.origin).href)
-            } else if (
-              value.includes("/") &&
-              (value.includes(".jpg") ||
-                value.includes(".png") ||
-                value.includes(".gif") ||
-                value.includes(".webp") ||
-                value.includes(".svg") ||
-                value.includes("image") ||
-                value.includes("media"))
-            ) {
-              // Try to detect URLs that don't start with standard URL prefixes
-              // This is a heuristic approach, might need adjustment
-              try {
-                const possibleUrl = new URL(value, window.location.origin)
-                el.setAttribute(attr.name, possibleUrl.href)
-              } catch (e) {
-                // Not a valid URL, ignore
-              }
-            }
-          }
-        })
-      })
-
-      // Process background images in style attributes
-      const elementsWithStyle = element.querySelectorAll('[style*="url("]')
-      elementsWithStyle.forEach((el) => {
-        const style = el.getAttribute("style")
-        if (style) {
-          // Find all url() occurrences and replace relative paths
-          const newStyle = style.replace(/url\(['"]?([^'")]+)['"]?\)/g, (match, url) => {
-            if (url.startsWith("//")) {
-              return `url('https:${url}')`
-            } else if (url.startsWith("/") || url.startsWith("./") || url.startsWith("../")) {
-              return `url('${new URL(url, window.location.origin).href}')`
-            }
-            return match
-          })
-          el.setAttribute("style", newStyle)
-        }
-      })
+      // Process data-* attributes that might contain URLs
+      this._processDataAttributes(element, baseUrl)
 
       return element
     } catch (error) {
       console.error("Error absolutizing URLs:", error)
-      // Return the original element if operation fails
       return element
     }
   }
@@ -197,41 +60,191 @@ export class UrlAbsolutizer {
   /**
    * Create a clone of the element with all URLs absolutized
    * @param {HTMLElement} element - DOM element to process
+   * @param {string} baseUrl - The base URL to use (defaults to current page origin)
    * @return {HTMLElement} A cloned element with absolute URLs
    */
-  static cloneWithAbsoluteUrls(element) {
+  static cloneWithAbsoluteUrls(element, baseUrl = window.location.origin) {
     try {
       // Clone the element
       const clone = element.cloneNode(true)
       // Absolutize URLs in the clone
-      return this.absolutizeUrls(clone)
+      return this.absolutizeUrls(clone, baseUrl)
     } catch (error) {
       console.error("Error cloning and absolutizing URLs:", error)
-      // Return a simple clone if operation fails
-      return element.cloneNode(true)
+      return element
     }
   }
 
+  // Private helper methods
+
   /**
-   * Clean all URL hrefs in an element using provided cleaning function
-   * @param {HTMLElement} element - DOM element to process
-   * @param {function} cleanUrlFunction - Function to clean URLs
-   * @return {HTMLElement} The element with cleaned URLs
+   * Process all link URLs in an element
+   * @private
    */
-  static cleanUrls(element, cleanUrlFunction) {
-    try {
-      if (!element || !cleanUrlFunction || typeof cleanUrlFunction !== "function") {
-        return element
+  static _processLinkUrls(element, baseUrl) {
+    const links = element.querySelectorAll("a[href]")
+    links.forEach((link) => {
+      const href = link.getAttribute("href")
+      if (href && href.trim() !== "") {
+        link.setAttribute("href", this.makeAbsolute(href, baseUrl))
       }
+    })
+  }
+
+  /**
+   * Process all image URLs in an element
+   * @private
+   */
+  static _processImageUrls(element, baseUrl) {
+    const images = element.querySelectorAll("img")
+    images.forEach((img) => {
+      // Handle src attribute
+      if (img.hasAttribute("src")) {
+        const src = img.getAttribute("src")
+        img.setAttribute("src", this.makeAbsolute(src, baseUrl))
+      }
+
+      // Handle data-src attribute
+      if (img.hasAttribute("data-src")) {
+        const dataSrc = img.getAttribute("data-src")
+        img.setAttribute("data-src", this.makeAbsolute(dataSrc, baseUrl))
+      }
+    })
+  }
+
+  /**
+   * Process all srcset attributes in an element
+   * @private
+   */
+  static _processSrcsetAttributes(element, baseUrl) {
+    // Process elements with srcset or data-srcset
+    const elementsWithSrcset = element.querySelectorAll("[srcset], [data-srcset]")
+    elementsWithSrcset.forEach((el) => {
+      ;["srcset", "data-srcset"].forEach((attrName) => {
+        if (el.hasAttribute(attrName)) {
+          const srcset = el.getAttribute(attrName)
+          const newSrcset = this._processSrcsetValue(srcset, baseUrl)
+          el.setAttribute(attrName, newSrcset)
+        }
+      })
+    })
+  }
+
+  /**
+   * Process a srcset attribute value
+   * @private
+   */
+  static _processSrcsetValue(srcset, baseUrl) {
+    return srcset
+      .split(",")
+      .map((part) => {
+        const parts = part.trim().split(" ")
+        let url = parts[0]
+        const descriptor = parts.slice(1).join(" ")
+
+        url = this.makeAbsolute(url, baseUrl)
+
+        return url + (descriptor ? " " + descriptor : "")
+      })
+      .join(", ")
+  }
+
+  /**
+   * Process all background image URLs in CSS
+   * @private
+   */
+  static _processBackgroundUrls(element, baseUrl) {
+    // First process inline styles with url()
+    const elementsWithStyle = element.querySelectorAll("*[style]")
+    elementsWithStyle.forEach((el) => {
+      const style = el.getAttribute("style")
+      if (style && style.includes("url(")) {
+        // Find all url() occurrences and replace relative paths
+        const newStyle = style.replace(/url\(['"]?([^'")]+)['"]?\)/g, (match, url) => {
+          const absoluteUrl = this.makeAbsolute(url, baseUrl)
+          return `url('${absoluteUrl}')`
+        })
+        el.setAttribute("style", newStyle)
+      }
+    })
+  }
+
+  /**
+   * Process all data-* attributes that might contain URLs
+   * @private
+   */
+  static _processDataAttributes(element, baseUrl) {
+    const allElements = element.querySelectorAll("*")
+    allElements.forEach((el) => {
+      Array.from(el.attributes).forEach((attr) => {
+        if (
+          attr.name.startsWith("data-") &&
+          attr.name !== "data-src" && // Skip those we've already handled
+          attr.name !== "data-srcset" &&
+          typeof attr.value === "string"
+        ) {
+          // Check if attribute value might be a URL
+          const value = attr.value
+          if (value.startsWith("//")) {
+            // Protocol-relative URL
+            el.setAttribute(attr.name, this.makeAbsolute(value, baseUrl))
+          } else if (value.startsWith("/") || value.startsWith("./") || value.startsWith("../")) {
+            // Relative URL
+            el.setAttribute(attr.name, this.makeAbsolute(value, baseUrl))
+          } else if (
+            value.includes("/") &&
+            (value.includes(".jpg") ||
+              value.includes(".png") ||
+              value.includes(".gif") ||
+              value.includes(".webp") ||
+              value.includes(".svg") ||
+              value.includes("image") ||
+              value.includes("media"))
+          ) {
+            // Try to detect URLs that don't start with standard URL prefixes
+            // This is a heuristic approach, might need adjustment
+            try {
+              const possibleUrl = new URL(value, baseUrl)
+              el.setAttribute(attr.name, possibleUrl.href)
+            } catch (e) {
+              // Not a valid URL, ignore
+            }
+          }
+        }
+      })
+    })
+  }
+}
+
+/**
+ * Base interface for URL cleaners
+ * Follows Interface Segregation Principle
+ */
+export class BaseUrlCleaner {
+  /**
+   * Clean a URL
+   * @param {string} url - The URL to clean
+   * @return {string} Cleaned URL
+   */
+  clean(url) {
+    throw new Error("Method must be implemented by subclass")
+  }
+
+  /**
+   * Apply cleaning to all URLs in an element
+   * @param {HTMLElement} element - DOM element to process
+   * @return {HTMLElement} Element with cleaned URLs
+   */
+  cleanUrlsInElement(element) {
+    try {
+      if (!element) return element
 
       // Find all anchor elements with href attributes
       const links = element.querySelectorAll("a[href]")
       links.forEach((link) => {
         const href = link.getAttribute("href")
         if (href && href.trim() !== "") {
-          // Skip validation and just try to clean every URL
-          // The cleanUrlFunction should handle invalid URLs internally
-          const cleanedUrl = cleanUrlFunction(href)
+          const cleanedUrl = this.clean(href)
           if (cleanedUrl) {
             link.setAttribute("href", cleanedUrl)
           }
@@ -245,24 +258,64 @@ export class UrlAbsolutizer {
   }
 
   /**
+   * Create a clone of the element with all URLs cleaned
+   * @param {HTMLElement} element - DOM element to process
+   * @return {HTMLElement} A cloned element with cleaned URLs
+   */
+  cloneWithCleanUrls(element) {
+    try {
+      // Clone the element
+      const clone = element.cloneNode(true)
+      // Clean URLs in the clone
+      return this.cleanUrlsInElement(clone)
+    } catch (error) {
+      console.error("Error cloning and cleaning URLs:", error)
+      return element
+    }
+  }
+}
+
+/**
+ * Utility class that combines URL absolutization and cleaning
+ */
+export class UrlProcessor {
+  /**
+   * Process an element to make all URLs absolute and cleaned
+   * @param {HTMLElement} element - DOM element to process
+   * @param {BaseUrlCleaner} cleaner - URL cleaner instance
+   * @param {string} baseUrl - Base URL for absolutization
+   * @return {HTMLElement} Element with processed URLs
+   */
+  static processUrls(element, cleaner, baseUrl = window.location.origin) {
+    if (!element) return element
+
+    // First absolutize URLs
+    const elementWithAbsoluteUrls = UrlAbsolutizer.absolutizeUrls(element, baseUrl)
+
+    // Then clean URLs if a cleaner is provided
+    if (cleaner instanceof BaseUrlCleaner) {
+      return cleaner.cleanUrlsInElement(elementWithAbsoluteUrls)
+    }
+
+    return elementWithAbsoluteUrls
+  }
+
+  /**
    * Create a clone of the element with all URLs absolutized and cleaned
    * @param {HTMLElement} element - DOM element to process
-   * @param {function} cleanUrlFunction - Function to clean URLs
-   * @return {HTMLElement} A cloned element with absolute and cleaned URLs
+   * @param {BaseUrlCleaner} cleaner - URL cleaner instance
+   * @param {string} baseUrl - Base URL for absolutization
+   * @return {HTMLElement} A cloned element with processed URLs
    */
-  static cloneWithAbsoluteAndCleanUrls(element, cleanUrlFunction) {
+  static cloneWithProcessedUrls(element, cleaner, baseUrl = window.location.origin) {
     try {
-      // First clone and absolutize URLs
-      const clone = this.cloneWithAbsoluteUrls(element)
-      // Then clean URLs if a cleaning function is provided
-      if (typeof cleanUrlFunction === "function") {
-        return this.cleanUrls(clone, cleanUrlFunction)
-      }
-      return clone
+      // Clone the element
+      const clone = element.cloneNode(true)
+      // Process URLs in the clone
+      return this.processUrls(clone, cleaner, baseUrl)
     } catch (error) {
       console.error("Error cloning and processing URLs:", error)
-      // Return a simple clone if operation fails
-      return element.cloneNode(true)
+      return element
     }
   }
 }

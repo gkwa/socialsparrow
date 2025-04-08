@@ -9,6 +9,8 @@ export default defineConfig({
     env: {
       NODE_ENV: "test",
     },
+    silent: true, // Suppress console logs during tests
+    onConsole: "ignore", // Ignore console outputs
   },
   resolve: {
     alias: {
