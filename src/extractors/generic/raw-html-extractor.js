@@ -19,7 +19,7 @@ export class RawHtmlExtractor extends BaseExtractor {
       const normalizedHtml = rawHtml.replace(/\s+/g, " ").trim()
 
       // Convert to base64
-      const base64Html = btoa(unescape(encodeURIComponent(normalizedHtml)))
+      const base64Html = btoa(encodeURIComponent(normalizedHtml))
 
       return { rawHtml: base64Html }
     } catch (error) {
