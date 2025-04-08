@@ -5,6 +5,7 @@ import { PricePerUnitExtractor } from "./generic/price-per-unit-extractor.js"
 import { RawTextExtractor } from "./generic/raw-text-extractor.js"
 import { RawHtmlExtractor } from "./generic/raw-html-extractor.js"
 import { UrlAbsolutizer } from "../core/url-absolutizer.js"
+import { UrlService } from "../core/url-service.js"
 
 /**
  * Composite extractor that combines multiple extractors
@@ -68,6 +69,8 @@ export class ProductExtractor {
 
         // Additionally, clean image URLs in the clone specifically for websites
         this.cleanImageUrlsInElement(elementForHtmlExtraction)
+        // Clean all URLs in the element, especially product links
+        this.cleanAllUrlsInElement(elementForHtmlExtraction)
       }
 
       // Create result object
@@ -95,6 +98,30 @@ export class ProductExtractor {
         rawTextContent: "Error extracting content",
         rawHtml: "Error extracting HTML",
       }
+    }
+  }
+
+  /**
+   * Clean all URLs in an element, particularly links and hrefs
+   * @param {HTMLElement} element - The element to process
+   * @return {HTMLElement} The element with cleaned URLs
+   */
+  cleanAllUrlsInElement(element) {
+    try {
+      // Find all anchor elements with href attributes
+      const links = element.querySelectorAll("a[href]")
+      links.forEach((link) => {
+        const href = link.getAttribute("href")
+        if (href) {
+          // Clean the URL using the UrlService
+          const cleanedUrl = UrlService.cleanUrl(href)
+          link.setAttribute("href", cleanedUrl)
+        }
+      })
+      return element
+    } catch (error) {
+      console.error("Error cleaning URLs in element:", error)
+      return element
     }
   }
 
