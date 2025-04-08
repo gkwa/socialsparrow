@@ -211,4 +211,58 @@ export class UrlAbsolutizer {
       return element.cloneNode(true)
     }
   }
+
+  /**
+   * Clean all URL hrefs in an element using provided cleaning function
+   * @param {HTMLElement} element - DOM element to process
+   * @param {function} cleanUrlFunction - Function to clean URLs
+   * @return {HTMLElement} The element with cleaned URLs
+   */
+  static cleanUrls(element, cleanUrlFunction) {
+    try {
+      if (!element || !cleanUrlFunction || typeof cleanUrlFunction !== "function") {
+        return element
+      }
+
+      // Find all anchor elements with href attributes
+      const links = element.querySelectorAll("a[href]")
+      links.forEach((link) => {
+        const href = link.getAttribute("href")
+        if (href && href.trim() !== "") {
+          // Skip validation and just try to clean every URL
+          // The cleanUrlFunction should handle invalid URLs internally
+          const cleanedUrl = cleanUrlFunction(href)
+          if (cleanedUrl) {
+            link.setAttribute("href", cleanedUrl)
+          }
+        }
+      })
+      return element
+    } catch (error) {
+      console.error("Error cleaning URLs in element:", error)
+      return element
+    }
+  }
+
+  /**
+   * Create a clone of the element with all URLs absolutized and cleaned
+   * @param {HTMLElement} element - DOM element to process
+   * @param {function} cleanUrlFunction - Function to clean URLs
+   * @return {HTMLElement} A cloned element with absolute and cleaned URLs
+   */
+  static cloneWithAbsoluteAndCleanUrls(element, cleanUrlFunction) {
+    try {
+      // First clone and absolutize URLs
+      const clone = this.cloneWithAbsoluteUrls(element)
+      // Then clean URLs if a cleaning function is provided
+      if (typeof cleanUrlFunction === "function") {
+        return this.cleanUrls(clone, cleanUrlFunction)
+      }
+      return clone
+    } catch (error) {
+      console.error("Error cloning and processing URLs:", error)
+      // Return a simple clone if operation fails
+      return element.cloneNode(true)
+    }
+  }
 }

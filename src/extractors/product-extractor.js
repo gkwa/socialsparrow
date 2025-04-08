@@ -64,13 +64,14 @@ export class ProductExtractor {
 
       // If URL absolutization is enabled
       if (this.absolutizeUrls) {
-        // Clone the element and absolutize URLs in the clone
-        elementForHtmlExtraction = UrlAbsolutizer.cloneWithAbsoluteUrls(element)
+        // Clone the element with absolute and cleaned URLs
+        elementForHtmlExtraction = UrlAbsolutizer.cloneWithAbsoluteAndCleanUrls(
+          element,
+          UrlService.cleanUrl,
+        )
 
         // Additionally, clean image URLs in the clone specifically for websites
         this.cleanImageUrlsInElement(elementForHtmlExtraction)
-        // Clean all URLs in the element, especially product links
-        this.cleanAllUrlsInElement(elementForHtmlExtraction)
       }
 
       // Create result object
@@ -79,7 +80,7 @@ export class ProductExtractor {
       // Apply all extractors, but handle RawHtmlExtractor separately
       for (const extractor of this.extractors) {
         if (extractor instanceof RawHtmlExtractor) {
-          // Use the absolutized element for HTML extraction
+          // Use the absolutized and cleaned element for HTML extraction
           Object.assign(result, extractor.extract(elementForHtmlExtraction))
         } else {
           // Use the original element for all other extractors
@@ -98,30 +99,6 @@ export class ProductExtractor {
         rawTextContent: "Error extracting content",
         rawHtml: "Error extracting HTML",
       }
-    }
-  }
-
-  /**
-   * Clean all URLs in an element, particularly links and hrefs
-   * @param {HTMLElement} element - The element to process
-   * @return {HTMLElement} The element with cleaned URLs
-   */
-  cleanAllUrlsInElement(element) {
-    try {
-      // Find all anchor elements with href attributes
-      const links = element.querySelectorAll("a[href]")
-      links.forEach((link) => {
-        const href = link.getAttribute("href")
-        if (href) {
-          // Clean the URL using the UrlService
-          const cleanedUrl = UrlService.cleanUrl(href)
-          link.setAttribute("href", cleanedUrl)
-        }
-      })
-      return element
-    } catch (error) {
-      console.error("Error cleaning URLs in element:", error)
-      return element
     }
   }
 

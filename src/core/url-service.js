@@ -10,11 +10,22 @@ export class UrlService {
    */
   static cleanUrl(url) {
     try {
+      // Basic validation - if not a string or empty, return as is
+      if (!url || typeof url !== "string" || url.trim() === "") {
+        return url
+      }
+
+      // Handle URLs that are already cleaned or special cases
+      if (url === "N/A" || url === "Error") {
+        return url
+      }
+
+      // Even if URL validation fails, try to clean it using the appropriate cleaner
       const urlCleaner = UrlCleanerFactory.createForUrl(url)
       return urlCleaner.clean(url)
     } catch (error) {
-      // Only log in non-test environments
-      if (process.env.NODE_ENV !== "test") {
+      // Only log in non-test environments, using a browser-safe check
+      if (typeof process === "undefined" || process.env?.NODE_ENV !== "test") {
         console.error("Error cleaning URL:", error)
       }
       return url // Return original URL if cleaning fails
@@ -44,8 +55,8 @@ export class UrlService {
       }
       return imageUrl
     } catch (error) {
-      // Only log in non-test environments
-      if (process.env.NODE_ENV !== "test") {
+      // Only log in non-test environments, using a browser-safe check
+      if (typeof process === "undefined" || process.env?.NODE_ENV !== "test") {
         console.error("Error normalizing image URL:", error)
       }
       return imageUrl
@@ -77,7 +88,19 @@ export class GenericUrlCleaner extends BaseUrlCleaner {
    */
   clean(url) {
     try {
-      const parsedUrl = new URL(url)
+      // Basic validation
+      if (!url || typeof url !== "string" || url.trim() === "") {
+        return url
+      }
+
+      let parsedUrl
+      try {
+        parsedUrl = new URL(url)
+      } catch (e) {
+        // If URL is invalid, return it as is
+        return url
+      }
+
       // List of common tracking parameters to remove
       const trackingParams = [
         "utm_source",
@@ -100,6 +123,13 @@ export class GenericUrlCleaner extends BaseUrlCleaner {
         "linkId",
         "cid",
         "mkt_tok",
+        // Additional Amazon-specific parameters
+        "dib",
+        "dib_tag",
+        "keywords",
+        "qid",
+        "sbo",
+        "sr",
       ]
       // Remove tracking parameters
       trackingParams.forEach((param) => {
@@ -108,8 +138,8 @@ export class GenericUrlCleaner extends BaseUrlCleaner {
       // Return URL without tracking parameters
       return `${parsedUrl.origin}${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`
     } catch (error) {
-      // Only log in non-test environments
-      if (process.env.NODE_ENV !== "test") {
+      // Only log in non-test environments, using a browser-safe check
+      if (typeof process === "undefined" || process.env?.NODE_ENV !== "test") {
         console.error("Error in GenericUrlCleaner:", error)
       }
       return url
@@ -127,11 +157,37 @@ export class AmazonUrlCleaner extends BaseUrlCleaner {
    */
   clean(url) {
     try {
-      const parsedUrl = new URL(url)
+      // Basic validation
+      if (!url || typeof url !== "string" || url.trim() === "") {
+        return url
+      }
+
+      let parsedUrl
+      try {
+        parsedUrl = new URL(url)
+      } catch (e) {
+        // If URL is invalid, return it as is
+        return url
+      }
+
       // First apply generic cleaning to remove common tracking parameters
       const genericCleaner = new GenericUrlCleaner()
-      const partiallyCleanedUrl = genericCleaner.clean(url)
-      const reParsedUrl = new URL(partiallyCleanedUrl)
+      let partiallyCleanedUrl
+      try {
+        partiallyCleanedUrl = genericCleaner.clean(url)
+      } catch (e) {
+        // If generic cleaning fails, continue with the original URL
+        partiallyCleanedUrl = url
+      }
+
+      let reParsedUrl
+      try {
+        reParsedUrl = new URL(partiallyCleanedUrl)
+      } catch (e) {
+        // If URL parsing fails after generic cleaning, return the original URL
+        return url
+      }
+
       // Check for standard product URL with /dp/ pattern
       if (parsedUrl.hostname.includes("amazon.") && parsedUrl.pathname.includes("/dp/")) {
         // Find the product ID section
@@ -160,8 +216,8 @@ export class AmazonUrlCleaner extends BaseUrlCleaner {
       // return the URL with just tracking parameters removed
       return `${reParsedUrl.origin}${reParsedUrl.pathname}${reParsedUrl.search ? reParsedUrl.search : ""}`
     } catch (error) {
-      // Only log in non-test environments
-      if (process.env.NODE_ENV !== "test") {
+      // Only log in non-test environments, using a browser-safe check
+      if (typeof process === "undefined" || process.env?.NODE_ENV !== "test") {
         console.error("Error in AmazonUrlCleaner:", error)
       }
       return url
@@ -179,11 +235,29 @@ export class SafewayAlbertsonsUrlCleaner extends BaseUrlCleaner {
    */
   clean(url) {
     try {
-      const parsedUrl = new URL(url)
+      // Basic validation
+      if (!url || typeof url !== "string" || url.trim() === "") {
+        return url
+      }
+
+      let parsedUrl
+      try {
+        parsedUrl = new URL(url)
+      } catch (e) {
+        // If URL is invalid, return it as is
+        return url
+      }
+
       // First apply generic cleaning to remove common tracking parameters
       const genericCleaner = new GenericUrlCleaner()
-      const partiallyCleanedUrl = genericCleaner.clean(url)
-      const reParsedUrl = new URL(partiallyCleanedUrl)
+      let partiallyCleanedUrl
+      try {
+        partiallyCleanedUrl = genericCleaner.clean(url)
+      } catch (e) {
+        // If generic cleaning fails, continue with the original URL
+        partiallyCleanedUrl = url
+      }
+
       // Check for product detail URLs
       if (parsedUrl.pathname.includes("/shop/product-details")) {
         // Extract the product ID from the pathname
@@ -215,28 +289,34 @@ export class WalmartUrlCleaner extends BaseUrlCleaner {
    */
   clean(url) {
     try {
-      // First, check if the URL is potentially valid
-      if (!url || typeof url !== "string") {
+      // Basic validation
+      if (!url || typeof url !== "string" || url.trim() === "") {
         return url
       }
 
-      // Attempt to parse the URL, return original if invalid
       let parsedUrl
       try {
         parsedUrl = new URL(url)
-      } catch (urlError) {
+      } catch (e) {
+        // If URL is invalid, return it as is
         return url
       }
 
       // First apply generic cleaning to remove common tracking parameters
       const genericCleaner = new GenericUrlCleaner()
-      const partiallyCleanedUrl = genericCleaner.clean(url)
+      let partiallyCleanedUrl
+      try {
+        partiallyCleanedUrl = genericCleaner.clean(url)
+      } catch (e) {
+        // If generic cleaning fails, continue with the original URL
+        partiallyCleanedUrl = url
+      }
 
-      // Re-parse the partially cleaned URL
       let cleanParsedUrl
       try {
         cleanParsedUrl = new URL(partiallyCleanedUrl)
-      } catch (reParseError) {
+      } catch (e) {
+        // If URL parsing fails after generic cleaning, return the original URL
         return url
       }
 
@@ -287,6 +367,11 @@ export class UrlCleanerFactory {
    */
   static createForUrl(url) {
     try {
+      // Basic validation
+      if (!url || typeof url !== "string" || url.trim() === "") {
+        return new GenericUrlCleaner()
+      }
+
       // Check the domain to determine which cleaner to use
       if (url.includes("amazon.")) {
         return new AmazonUrlCleaner()
@@ -298,8 +383,8 @@ export class UrlCleanerFactory {
       // Default to the generic cleaner
       return new GenericUrlCleaner()
     } catch (error) {
-      // Only log in non-test environments
-      if (process.env.NODE_ENV !== "test") {
+      // Only log in non-test environments, using a browser-safe check
+      if (typeof process === "undefined" || process.env?.NODE_ENV !== "test") {
         console.error("Error creating URL cleaner:", error)
       }
       return new GenericUrlCleaner()
