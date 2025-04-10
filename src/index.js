@@ -5,5 +5,6 @@ import {
   initExtraction,
   decodeRawHtml,
 } from "./services/extraction-service.js"
+import { UuidGenerator } from "./core/uuid-generator.js"
 
-export { extractProducts, extractProductsToClipboard, initExtraction, decodeRawHtml }
+export { extractProducts, extractProductsToClipboard, initExtraction, decodeRawHtml, UuidGenerator }

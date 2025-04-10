@@ -1,3 +1,5 @@
+import { UuidGenerator } from "./uuid-generator.js"
+
 /**
  * Data transformer class
  * Single responsibility: formatting data for output
@@ -17,6 +19,7 @@ export class DataTransformer {
       const productWithMetadata = {
         ...product,
         timestamp,
+        id: product.id || UuidGenerator.generate(),
       }
 
       // Add search term as category if available
