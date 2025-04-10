@@ -35,6 +35,15 @@ describe("UrlService", () => {
     expect(cleanUrl).toBe("https://www.amazon.com/gp/product/B079R47PHD")
   })
 
+  it("should clean complex Amazon redirect URLs", () => {
+    const dirtyUrl =
+      "https://www.amazon.com/sspa/click?ie=UTF8&spc=MTo0MTM4MDEzNDY5OTAwODI3OjE3NDQzMjQ5ODk6c3BfYnRmOjMwMDY3NzYyOTU2ODYwMjo6MDo6&url=%2FWeesdsio-Reusable-Containers-Vegetable-Anti-Oxidation%2Fdp%2FB0DSPM9RQZ%2Fref%3Dsr_1_61_sspa%3Fdib%3DeyJ2IjoiMSJ9.uxRL4syCNkIKcgPwimwobZUkHQad3VC49-H5_m9KcR-Jv7JOqPJsE1vOpGR-eFTchh0cEm-vhFawlxJOGaDySmh10Ly4zOFsLXW1YZcjleBkoV6qCI1E6iAEPWgJduA7XHQG61Vf8gbAte0vmoQyMkln3xcmVACD5-I7FPkxumSLLl9KteeZ9BX3vwldn7tnGY_lsPmb78h7CdENB0q4ab7BDNfomTWAadnLdtBfSxW81Jq-HFyVNyar-Q59Lv7iXi9Hfe7NxX4MPaSPNuqq9R3AWMvMMUydrpVkfbZRgLw.csP2GVjx5o7gG-LC68KYKrWPtPv4G92NlNskP237yNU%26dib_tag%3Dse%26keywords%3Dfresh%2Bavocados%26qid%3D1744324989%26sr%3D8-61-spons%26sp_csd%3Dd2lkZ2V0TmFtZT1zcF9idGY%26psc%3D1"
+    const cleanUrl = UrlService.cleanUrl(dirtyUrl)
+    expect(cleanUrl).toBe(
+      "https://www.amazon.com/Weesdsio-Reusable-Containers-Vegetable-Anti-Oxidation/dp/B0DSPM9RQZ",
+    )
+  })
+
   it("should handle non-Amazon URLs", () => {
     const dirtyUrl = "https://example.com/?utm_source=test&utm_medium=email"
     const cleanUrl = UrlService.cleanUrl(dirtyUrl)

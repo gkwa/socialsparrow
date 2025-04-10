@@ -25,7 +25,7 @@ export class RawHtmlExtractor extends BaseExtractor {
       // Convert to base64
       const base64Html = this.toBase64(compressedData)
 
-      return { rawHtml: base64Html, compressed: true }
+      return { rawHtml: base64Html }
     } catch (error) {
       console.error("Error extracting raw HTML:", error)
       return { rawHtml: "Error extracting HTML" }
@@ -104,10 +104,9 @@ export class RawHtmlExtractor extends BaseExtractor {
   /**
    * Static utility to decode base64-encoded HTML
    * @param {string} base64Html - Base64-encoded HTML string
-   * @param {boolean} isCompressed - Whether the data is compressed
    * @return {string} Decoded HTML
    */
-  static decodeRawHtml(base64Html, isCompressed = true) {
+  static decodeRawHtml(base64Html) {
     try {
       let binaryData
 
@@ -130,18 +129,13 @@ export class RawHtmlExtractor extends BaseExtractor {
         return "Decoding failed"
       }
 
-      // Decompress if needed
-      if (isCompressed) {
-        try {
-          const decompressedData = pako.inflate(binaryData)
-          return new TextDecoder().decode(decompressedData)
-        } catch (decompressError) {
-          console.warn("Decompression failed, treating as uncompressed:", decompressError)
-          // Try to decode as uncompressed data
-          return new TextDecoder().decode(binaryData)
-        }
-      } else {
-        // Decode uncompressed data
+      // Always assume the data is compressed
+      try {
+        const decompressedData = pako.inflate(binaryData)
+        return new TextDecoder().decode(decompressedData)
+      } catch (decompressError) {
+        console.warn("Decompression failed, treating as uncompressed:", decompressError)
+        // Try to decode as uncompressed data
         return new TextDecoder().decode(binaryData)
       }
     } catch (error) {

@@ -177,6 +177,20 @@ export class GenericUrlCleaner extends BaseUrlCleaner {
         "qid",
         "sbo",
         "sr",
+        // Additional tracking parameters
+        "psc",
+        "sp_csd",
+        "ie",
+        "spc",
+        "pd_rd_i",
+        "pd_rd_w",
+        "pd_rd_wg",
+        "pf_rd_p",
+        "pf_rd_r",
+        "pd_rd_r",
+        "_encoding",
+        "pf_rd_s",
+        "pf_rd_t",
       ]
       // Remove tracking parameters
       trackingParams.forEach((param) => {
@@ -208,6 +222,31 @@ export class AmazonUrlCleaner extends BaseUrlCleaner {
       // Basic validation
       if (!url || typeof url !== "string" || url.trim() === "") {
         return url
+      }
+
+      // Handle the case of Amazon redirect or SSP click links
+      if (url.includes("amazon.com/sspa/click") || url.includes("amazon.com/sp/click")) {
+        const encodedRedirectMatch = url.match(/url=([^&]+)/)
+        if (encodedRedirectMatch && encodedRedirectMatch[1]) {
+          try {
+            // Decode the redirect URL and then clean it
+            const decodedUrl = decodeURIComponent(encodedRedirectMatch[1])
+
+            // If the decoded URL is a relative path (starts with /), add the Amazon origin
+            if (decodedUrl.startsWith("/")) {
+              // Extract the origin from the original URL
+              const originalUrlObj = new URL(url)
+              const amazonUrl = `${originalUrlObj.origin}${decodedUrl}`
+              // Recursively clean the complete Amazon URL
+              return this.clean(amazonUrl)
+            }
+
+            // Otherwise, recursively clean the decoded URL
+            return this.clean(decodedUrl)
+          } catch (e) {
+            // If decoding fails, continue with normal cleaning
+          }
+        }
       }
 
       let parsedUrl

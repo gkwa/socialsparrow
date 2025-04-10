@@ -57,9 +57,8 @@ export async function extractProductsToClipboard(customConfig = {}) {
 /**
  * Utility function to decode raw HTML from base64
  * @param {string} base64Html - Base64-encoded HTML
- * @param {boolean} isCompressed - Whether the HTML is compressed (default: true)
  * @return {string} Decoded HTML
  */
-export function decodeRawHtml(base64Html, isCompressed = true) {
-  return RawHtmlExtractor.decodeRawHtml(base64Html, isCompressed)
+export function decodeRawHtml(base64Html) {
+  return RawHtmlExtractor.decodeRawHtml(base64Html)
 }
