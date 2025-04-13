@@ -72,3 +72,18 @@ package:
     mkdir -p releases
     zip -j releases/socialsparrow-$(date +%Y%m%d).zip dist/*
     @echo "Package created at releases/socialsparrow-$(date +%Y%m%d).zip"
+
+
+
+# Bundle for DevTools with inline sourcemaps
+bundle-for-devtools-with-sourcemaps:
+    pnpm run build
+    node -e "const fs = require('fs'); \
+        const umdFile = fs.readFileSync('dist/index.umd.cjs', 'utf8'); \
+        const mapFile = fs.readFileSync('dist/index.umd.cjs.map', 'utf8'); \
+        const base64Map = Buffer.from(mapFile).toString('base64'); \
+        const withSourceMap = umdFile + '\n//# sourceMappingURL=data:application/json;base64,' + base64Map; \
+        fs.writeFileSync('dist/index.umd.with-sourcemap.cjs', withSourceMap); \
+        console.log('Created dist/index.umd.with-sourcemap.cjs with inline sourcemap'); \
+        require('child_process').execSync('cat dist/index.umd.with-sourcemap.cjs | pbcopy || cat dist/index.umd.with-sourcemap.cjs | xclip -selection clipboard'); \
+        console.log('Copied to clipboard. Paste into Chrome DevTools snippets.');"

@@ -15,7 +15,8 @@
     "prepublishOnly": "pnpm run build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:detail": "vitest run --reporter=verbose --mode detail"
   },
   "keywords": ["e-commerce", "product", "extraction", "scraping"],
   "author": "Your Name",
