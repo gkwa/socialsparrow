@@ -1,6 +1,7 @@
 import { BaseExtractor } from "../base-extractor.js"
 import * as pako from "pako"
 import { UrlCleanerStrategyProvider } from "../../core/url-cleaning/url-cleaner-strategy-provider.js"
+import { HtmlSanitizerService } from "../../core/html-sanitizer.js"
 
 /**
  * Extracts raw HTML content from a product element and stores it as base64-encoded text
@@ -30,10 +31,13 @@ export class RawHtmlExtractor extends BaseExtractor {
       const normalizedHtml = rawHtml.replace(/\s+/g, " ").trim()
 
       // Clean URLs in the HTML before compression using appropriate strategies
-      const cleanedHtml = this.cleanUrlsInHtml(normalizedHtml)
+      const urlCleanedHtml = this.cleanUrlsInHtml(normalizedHtml)
+
+      // Sanitize HTML based on the website
+      const sanitizedHtml = HtmlSanitizerService.sanitize(urlCleanedHtml, this.config.websiteId)
 
       // Compress the HTML
-      const compressedData = this.compressData(cleanedHtml)
+      const compressedData = this.compressData(sanitizedHtml)
 
       // Convert to base64
       const base64Html = this.toBase64(compressedData)
