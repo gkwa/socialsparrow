@@ -1,12 +1,22 @@
 import { BaseExtractor } from "../base-extractor.js"
 import * as pako from "pako"
-import { AmazonUrlCleaner } from "../../core/url-service.js"
+import { BaseUrlCleaner } from "../../core/url-service.js"
 
 /**
  * Extracts raw HTML content from a product element and stores it as base64-encoded text
  * This provides a backup of the original HTML structure for resilience against HTML changes
  */
 export class RawHtmlExtractor extends BaseExtractor {
+  /**
+   * Create a new RawHtmlExtractor
+   * @param {Object} config - Configuration object
+   * @param {BaseUrlCleaner} [urlCleaner=null] - URL cleaner strategy to use
+   */
+  constructor(config, urlCleaner = null) {
+    super(config)
+    this.urlCleaner = urlCleaner
+  }
+
   /**
    * Extract raw HTML content from an element
    * @param {HTMLElement} element - DOM element to extract HTML from
@@ -20,17 +30,21 @@ export class RawHtmlExtractor extends BaseExtractor {
       // Normalize newlines to spaces
       const normalizedHtml = rawHtml.replace(/\s+/g, " ").trim()
 
-      // Clean any Amazon URLs in the HTML before compression
-      const cleanedHtml = this.cleanAmazonUrls(normalizedHtml)
+      // Clean URLs in the HTML if a cleaner is provided
+      let processedHtml = normalizedHtml
+      if (this.urlCleaner) {
+        processedHtml = this.cleanUrlsInHtml(normalizedHtml)
+      }
 
-      if (cleanedHtml.search(/\/ref=sr/) !== -1) {
+      // Debug: Check for Amazon ref parameters
+      if (processedHtml.search(/\/ref=sr/) !== -1) {
         console.log("The string contains '/ref=sr'")
       } else {
         console.log("The string does not contain '/ref=sr'")
       }
 
       // Compress the HTML
-      const compressedData = this.compressData(cleanedHtml)
+      const compressedData = this.compressData(processedHtml)
 
       // Convert to base64
       const base64Html = this.toBase64(compressedData)
@@ -43,25 +57,23 @@ export class RawHtmlExtractor extends BaseExtractor {
   }
 
   /**
-   * Clean Amazon URLs in HTML content
+   * Clean URLs in HTML content using the provided URL cleaner
    * @param {string} html - HTML content to clean
-   * @return {string} HTML with cleaned Amazon URLs
+   * @return {string} HTML with cleaned URLs
    */
-  cleanAmazonUrls(html) {
+  cleanUrlsInHtml(html) {
     try {
-      // Create an instance of AmazonUrlCleaner
-      const amazonCleaner = new AmazonUrlCleaner()
+      if (!this.urlCleaner) return html
 
-      // Use regular expression to find Amazon URLs in the HTML
-      const amazonUrlRegex = /(https?:\/\/(?:www\.)?amazon\.[a-z.]+\/[^\s"']+)/g
+      // Use regular expression to find URLs in the HTML
+      const urlRegex = /(https?:\/\/[^\s"'<>]+)/g
 
-      return html.replace(amazonUrlRegex, (match) => {
-        // Clean the URL using the AmazonUrlCleaner
-        const cleanedUrl = amazonCleaner.clean(match)
-        return cleanedUrl
+      return html.replace(urlRegex, (match) => {
+        // Clean the URL using the provided cleaner
+        return this.urlCleaner.clean(match)
       })
     } catch (error) {
-      console.error("Error cleaning Amazon URLs in HTML:", error)
+      console.error("Error cleaning URLs in HTML:", error)
       return html // Return original HTML if cleaning fails
     }
   }
