@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite"
 import { resolve } from "path"
 
@@ -19,7 +18,7 @@ export default defineConfig({
     minify: "esbuild",
     esbuildOptions: {
       keepNames: true,
-      minifyIdentifiers: false
+      minifyIdentifiers: false,
     },
   },
 })

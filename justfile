@@ -73,8 +73,6 @@ package:
     zip -j releases/socialsparrow-$(date +%Y%m%d).zip dist/*
     @echo "Package created at releases/socialsparrow-$(date +%Y%m%d).zip"
 
-
-
 # Bundle for DevTools with inline sourcemaps
 bundle-for-devtools-with-sourcemaps:
     pnpm run build
