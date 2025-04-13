@@ -85,3 +85,11 @@ bundle-for-devtools-with-sourcemaps:
         console.log('Created dist/index.umd.with-sourcemap.cjs with inline sourcemap'); \
         require('child_process').execSync('cat dist/index.umd.with-sourcemap.cjs | pbcopy || cat dist/index.umd.with-sourcemap.cjs | xclip -selection clipboard'); \
         console.log('Copied to clipboard. Paste into Chrome DevTools snippets.');"
+
+# Run tests
+test:
+    pnpm test
+
+# Run tests and show details
+test-show-detail:
+    pnpm test:detail
