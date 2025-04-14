@@ -5,12 +5,12 @@ export const lamsSeafoodConfig = {
   siteName: "Lam's Seafood",
   baseUrl: "seattle.lamsseafood.com",
   selectors: {
-    productContainer: ".sc-kTYlsj, .lgGUGt",
-    productName: ".sc-jGONNV, .ea-dyye",
-    productPrice: ".sc-iugpza, .kldjci",
-    productUnit: ".sc-gMFoeA, .lpuqvE",
-    productImage: ".sc-lopPiv, .itlMCX",
-    productLink: "a.sc-dEMAZk, a.bdwhla",
+    productContainer: ".le-col.sc-tSoMJ",
+    productName: ".sc-jaZhys",
+    productPrice: ".sc-gMFoeA",
+    productUnit: ".sc-geEwSt.kaMOkQ",
+    productImage: ".sc-jGONNV",
+    productLink: "a.sc-iugpza",
   },
   patterns: {
     price: /\$?([0-9]+\.[0-9]+)/,

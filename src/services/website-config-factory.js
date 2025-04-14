@@ -1,5 +1,6 @@
 import { WebsiteConfigRegistry } from "../config/website-config-registry.js"
 import { ProductConfig } from "../config/product-config.js"
+import { lamsSeafoodConfig } from "../config/websites/lams-seafood-config.js"
 /**
  * Factory for creating website configurations
  */
@@ -103,15 +104,15 @@ export class WebsiteConfigFactory {
         price: /\$\s*(\d+\.?\d*)/,
       },
     })
-    // Lams Seafood configuration
+    // Lams Seafood configuration - Updated to use the imported config
     const lamsSeafoodConfig = ProductConfig.forWebsite("lamss", {
-      productContainer: ".le-col.sc-iIPnmv",
+      productContainer: ".le-col.sc-tSoMJ",
       selectors: {
-        productName: ".sc-jGONNV",
-        productPrice: ".sc-iugpza",
-        productUnit: ".sc-gMFoeA",
-        productImage: "img.sc-lopPiv",
-        productLink: "a.sc-dEMAZk",
+        productName: ".sc-jaZhys",
+        productPrice: ".sc-gMFoeA",
+        productUnit: ".sc-geEwSt.kaMOkQ",
+        productImage: ".sc-jGONNV",
+        productLink: "a.sc-iugpza",
       },
       patterns: {
         price: /\$(\d+\.\d+)/,

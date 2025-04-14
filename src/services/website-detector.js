@@ -32,7 +32,11 @@ export class WebsiteDetector {
       return "wholefoodsmarket"
     } else if (currentUrl.includes("pcc-markets") || document.querySelector(".e-13udsys")) {
       return "pcc-markets"
-    } else if (currentUrl.includes("lamsseafood") || document.querySelector(".sc-iJpgEM")) {
+    } else if (
+      currentUrl.includes("lamsseafood") ||
+      document.querySelector(".le-col.sc-tSoMJ") ||
+      document.querySelector(".sc-jaZhys")
+    ) {
       return "lamss"
     } else if (
       currentUrl.includes("walmart.com") ||

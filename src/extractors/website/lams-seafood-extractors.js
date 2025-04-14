@@ -13,9 +13,9 @@ export class LamsSeafoodNameExtractor extends BaseExtractor {
       name = nameElement.textContent.trim()
 
       // Get URL from the anchor tag
-      const linkElement = element.querySelector(this.config.selectors.productLink || "a.sc-dEMAZk")
+      const linkElement = element.querySelector(this.config.selectors.productLink || "a.sc-iugpza")
       if (linkElement) {
-        url = linkElement.getAttribute("href")
+        url = linkElement.getAttribute("href") || "N/A"
         // Make URL absolute if it's relative
         if (url !== "N/A" && url.startsWith("/")) {
           url = `${window.location.origin}${url}`
@@ -56,14 +56,49 @@ export class LamsSeafoodPriceExtractor extends BaseExtractor {
  */
 export class LamsSeafoodUnitPriceExtractor extends BaseExtractor {
   extract(element) {
-    const unitPriceElement = element.querySelector(this.config.selectors.productUnit)
+    const unitPriceElements = element.querySelectorAll(this.config.selectors.productUnit)
     let pricePerUnit = "N/A"
 
-    if (unitPriceElement) {
-      pricePerUnit = unitPriceElement.textContent.trim()
+    if (unitPriceElements && unitPriceElements.length > 0) {
+      // Use the first unit element (for per each/lb/etc)
+      for (const unitElement of unitPriceElements) {
+        const unitText = unitElement.textContent.trim()
+        if (unitText.includes("/")) {
+          pricePerUnit = unitText.trim()
+          break
+        }
+      }
+
+      // If we didn't find a unit with "/", use the first unit text
+      if (pricePerUnit === "N/A" && unitPriceElements.length > 0) {
+        pricePerUnit = unitPriceElements[0].textContent.trim()
+      }
     }
 
     return { pricePerUnit }
+  }
+}
+
+/**
+ * Lams Seafood Size Extractor
+ */
+export class LamsSeafoodSizeExtractor extends BaseExtractor {
+  extract(element) {
+    const unitElements = element.querySelectorAll(this.config.selectors.productUnit)
+    let size = "N/A"
+
+    if (unitElements && unitElements.length > 0) {
+      // Look for size information (usually contains oz, lb, etc.)
+      for (const unitElement of unitElements) {
+        const text = unitElement.textContent.trim()
+        if (text.includes("oz") || text.includes("lb") || text.includes("g")) {
+          size = text.trim()
+          break
+        }
+      }
+    }
+
+    return { size }
   }
 }
 

@@ -3,6 +3,7 @@ import {
   LamsSeafoodNameExtractor,
   LamsSeafoodPriceExtractor,
   LamsSeafoodUnitPriceExtractor,
+  LamsSeafoodSizeExtractor,
   LamsSeafoodImageExtractor,
 } from "../../extractors/website/lams-seafood-extractors.js"
 
@@ -21,6 +22,7 @@ export class LamsSeafoodExtractorFactory {
       new LamsSeafoodNameExtractor(config),
       new LamsSeafoodPriceExtractor(config),
       new LamsSeafoodUnitPriceExtractor(config),
+      new LamsSeafoodSizeExtractor(config),
       new LamsSeafoodImageExtractor(config),
     ])
     return extractor
