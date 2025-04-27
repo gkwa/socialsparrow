@@ -135,18 +135,79 @@ export class UrlAbsolutizer {
    * @private
    */
   static _processSrcsetValue(srcset, baseUrl) {
-    return srcset
-      .split(",")
-      .map((part) => {
-        const parts = part.trim().split(" ")
-        let url = parts[0]
-        const descriptor = parts.slice(1).join(" ")
+    if (!srcset) return ""
 
-        url = this.makeAbsolute(url, baseUrl)
+    // Check if this looks like a complex srcset that might have commas in URL parameters
+    // Look for patterns like "foo,bar" followed by descriptors or ".jpg," without a descriptor
+    const hasCommasInUrls = /(,\w+)[^,\s]*\s+\d+[xw]|\.jpg,/.test(srcset)
 
-        return url + (descriptor ? " " + descriptor : "")
-      })
-      .join(", ")
+    if (!hasCommasInUrls) {
+      // Simple case - split by commas and process each URL-descriptor pair
+      return srcset
+        .split(",")
+        .map((part) => {
+          const parts = part.trim().split(/\s+/)
+          let url = parts[0]
+          const descriptor = parts.slice(1).join(" ")
+
+          url = this.makeAbsolute(url, baseUrl)
+
+          return url + (descriptor ? " " + descriptor : "")
+        })
+        .join(", ")
+    }
+
+    // Complex case - handle srcsets with commas in the URLs
+    let result = []
+    let currentUrl = ""
+    let inUrl = true
+
+    // Split by commas but be smart about it
+    const parts = srcset.split(",")
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i].trim()
+
+      // Check if this part contains a descriptor (like "1.5x" or "200w")
+      const hasDescriptor = /\s+[\d\.]+x|\s+\d+w$/.test(part)
+
+      if (hasDescriptor) {
+        // This part has a descriptor, so it's a complete URL + descriptor
+        const [url, ...descriptorParts] = part.split(/\s+/)
+        const descriptor = descriptorParts.join(" ")
+
+        // If we were building a URL, finish it and add this part
+        if (currentUrl) {
+          currentUrl += "," + url
+          result.push(this.makeAbsolute(currentUrl, baseUrl) + (descriptor ? " " + descriptor : ""))
+          currentUrl = ""
+        } else {
+          // Otherwise, just process this complete part
+          result.push(this.makeAbsolute(url, baseUrl) + (descriptor ? " " + descriptor : ""))
+        }
+
+        inUrl = true
+      } else {
+        // This part does not have a descriptor, so it's either:
+        // 1. A URL that contains commas and continues in the next part
+        // 2. The beginning of a new URL
+        if (inUrl) {
+          // Continue building the current URL
+          currentUrl = currentUrl ? currentUrl + "," + part : part
+        } else {
+          // Start a new URL
+          currentUrl = part
+          inUrl = true
+        }
+      }
+    }
+
+    // If we have a remaining URL being built, add it
+    if (currentUrl) {
+      result.push(this.makeAbsolute(currentUrl, baseUrl))
+    }
+
+    return result.join(", ")
   }
 
   /**
